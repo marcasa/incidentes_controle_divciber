@@ -1,0 +1,25 @@
+# Ignorar arquivos de log
+*.log
+*.copy
+
+# Ignorar arquivos temporários
+*.tmp
+*.swp
+
+# Ignorar pastas específicas
+__pycache__/
+.venv/
+
+.flaskenv
+.vscode/
+instance/
+# Ignorar arquivos de configuração locais
+
+.env
+*.sqlite3
+*.db
+
+# Ignorar arquivos 
+*.xlsx
+*.csv
+*.pyc
