@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Cadastrar Análise</h2>
+
+
+
+
+<form method="post">
+    
+    <div class="container ">
+        <div class="row">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="status_incidente" class="form-label">Status</label>        
+                    <select class="form-select" name="status_incidente" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                        <option selected>{{ analise[0][2] if analise else 'Selecione o Status' }}</option>
+                        {% for incidente in tipos_incidentes %}
+                        <option value="{{ incidente.tipo_incidente}}">
+                        {{ incidente.tipo_incidente}}
+                        </option>
+                        {% endfor %}                   
+                </select>
+
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="data_hora" class="form-label">Data</label>
+                    <input type="datetime-local" class="form-control" 
+                    name="data_hora" 
+                    placeholder="Data" 
+                    value="{{analise[0][1] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                </div>
+            </div>
+            <div class="col">
+                <!-- <div class="mb-3">
+                    <label for="tipo_incidente" class="form-label">Tipo Incidente</label>
+                    <input type="text" class="form-control" name="tipo_incidente" placeholder="Tipo Incidente" value="{{ analise[0][2] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                </div> -->
+                <label for="tipo_incidente" class="form-label">Tipo de Incidente</label>        
+                <select class="form-select" name="tipo_incidente" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                    <option selected>{{ analise[0][2] if analise else 'Selecione tipo de incidente' }}</option>
+                    {% for incidente in tipos_incidentes %}
+                    <option value="{{ incidente.tipo_incidente}}">
+                    {{ incidente.tipo_incidente}}
+                    </option>
+                    {% endfor %}                   
+                </select>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="num_relatorio" class="form-label">Num Relatorio</label>
+                    <input type="text" class="form-control" name="num_relatorio" placeholder="Num Relatorio" value="{{ analise[0][3] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                </div>
+
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <label for="num_mensagem" class="form-label">Num Mensagem</label>
+                    <input type="text" class="form-control" name="num_mensagem" placeholder="Num Mensagem" value="{{ analise[0][4] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} >
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="ip_host" class="form-label">IP Host</label>
+                    <input type="text"  class="form-control" name="ip_host" placeholder="IP Host" value="{{ analise[0][5] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                </div>
+            </div>
+            <div class="col">
+
+            </div>
+
+        </div>
+
+    </div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                 <!-- <div class="mb-3">
+                    
+                    <input type="select" class="form-control" name="cpa" placeholder="CPA" value="{{ analise[0][6] if analise else '' }}" required>
+                </div>    -->
+                
+                <label for="btl" class="form-label">Batalhão</label>        
+                <select class="form-select" name="btl" id="btl_select" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                    <option selected>{{ analise[0][7] if analise else 'Selecione o batalhão' }}</option>
+                    {% for unidade in unidades %}
+                    <option value="{{ unidade.btl }}"
+                            data-cpa="{{ unidade.cpa }}"
+                    >
+                    {{ unidade.btl }}
+                    </option>
+                    {% endfor %}                   
+                </select>
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <label for="cpa" class="form-label">CPA</label>
+                    <!-- Campo com preenchimento automatico -->
+                    <input type="text" class="form-control" name="cpa" id="cpa_input" placeholder="CPA / Grande Comando" value="{{ analise[0][6] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} readonly required>
+                </div>
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <label for="cia" class="form-label">Cia</label>
+                    <input type="text" class="form-control" name="cia" placeholder="Cia" value="{{ analise[0][8] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h3>Observações</h3>
+                <div class="form-floating">
+                    
+                    <textarea class="form-control" placeholder="Observações" style="height: 300px;" name="observacoes" id="observacoes" {{ 'disabled' if edit_mode else '' }}>{{ analise[0][9] if analise else '' }}</textarea>
+                    <label for="observacoes">Observações</label>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+ <div class="container mt-2">
+    <button type="submit" class="btn btn-primary mb-3" {{ 'hidden' if edit_mode else '' }} id="btnSalvar">Salvar</button>
+    {% if edit_mode %}
+    <button type="button" id="btnEditar" class="btn btn-secondary mb-3">Editar</button>
+    <button type="button" id="btnCancelar" class="btn btn-warning mb-3" {{ 'hidden' if edit_mode else '' }}>Cancelar</button>
+    
+    {% endif %}
+</div>
+
+    
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}

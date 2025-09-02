@@ -3,23 +3,25 @@
 from datetime import datetime
 from app import db # Importando a instância do SQLAlchemy de app/__init__.py
 from werkzeug.security import generate_password_hash, check_password_hash # Importando funções para hash de senha
+from flask_login import UserMixin # Importando UserMixin para integração com Flask-Login
 
-
-class User(db.Model):
+class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True) # ID do usuário
     username = db.Column(db.String(100), unique=True, nullable=False) # Nome de usuário único
     email = db.Column(db.String(100), unique=True, nullable=False) # Email do usuário único
-    password_hash = db.Column(db.String(256), nullable=False) # Hash da senha do usuário
+    profile = db.Column(db.String(50), nullable=False) # Perfil do usuário (admin, user ou viewer)
+    password = db.Column(db.String(256), nullable=False) # Hash da senha do usuário
     
-    # Relacionamento: um usuário pode ter várias análises
+    # Relacionamento: um usuário pode ter várias análises e várias observações
     # 'backref' permite acessar o usuário a partir da análise (ex: analise.autor)
     analises = db.relationship('Analise', backref='autor', lazy=True)
+    observacoes = db.relationship('AnaliseObs', backref='autor_obs', lazy=True)
     
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password) # Gera o hash da senha
+    # def set_password(self, password):
+    #     self.password_hash = generate_password_hash(password) # Gera o hash da senha
     
-    def chack_password(self, password):
-        return check_password_hash(self.password_hash, password) # Verifica a senha fornecida com o hash armazenado
+    # def check_password(self, password):
+    #     return check_password_hash(self.password_hash, password) # Verifica a senha fornecida com o hash armazenado
     
     def __repr__(self):
         return f'<User {self.username}>'
@@ -37,5 +39,29 @@ class Analise(db.Model):
     end_date = db.Column(db.DateTime, nullable=True) # Data de encerramento da análise/incidente
     status = db.Column(db.String(50), default='Em andamento') # Status da análise
     
+    # Chave estrangeira para o usuário que realizou a análise
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Relacionamento: uma análise pode ter várias observações
+    # 'lazy=True' significa que as observações serão carregadas sob demanda
+    obs_analise = db.relationship('AnaliseObs', backref='analise', lazy=True)
+
     def __repr__(self):
         return f'<Analise {self.incident_type} - {self.report_number}>'
+    
+    
+    class AnaliseObs(db.Model):
+        
+        # Modelo para a tabela de observações de análise
+        id = db.Column(db.Integer, primary_key=True)
+        texto_observacao = db.Column(db.Text, nullable=False)
+        data_observacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+        
+        # Chave estrangeira para o usuário que inseriu a observação
+        usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+        
+        # Chave estrangeira para a análise à qual a observação pertence
+        analise_id = db.Column(db.Integer, db.ForeignKey('analise.id'), nullable=False)
+
+        def __repr__(self):
+            return f'<Observação {self.id}>'
