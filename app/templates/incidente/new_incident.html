@@ -1,6 +1,197 @@
-{% extends 'base.html' %}
+
+{% extends "base.html" %}
 
 {% block content %}
-<h2>Cadastrar Análise</h2>
+<div class="container">
+
+    <h2>{{ title }}</h2>
+    <form method="post">
+        
+        <div class="container ">
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="status_incidente" class="form-label"><strong>Status</strong></label>        
+                        <select class="form-select" name="status_incidente" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                            <option selected>testestatus</option>
+                            testestatus
+                            <option value="testestatus">
+                            testestatus
+                            </option>
+                                               
+                    </select>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="start_data_hora" class="form-label">Data/Hora Registro</label>
+                        <input type="datetime-local" class="form-control" 
+                        name="start_data_hora" 
+                        placeholder="Data" 
+                        value="{{analise[0][1] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                    </div>
+                </div>
+                <div class="col">
+                    <label for="incident_type" class="form-label">Tipo de Incidente</label>        
+                    <select class="form-select" name="incident_type" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                        <option selected>testetpcincident</option>
+                        testetpcincident
+                        <option value="testetpcincident">
+                        testetpcincident
+                        </option>
+                                          
+                    </select>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="report_number" class="form-label">Num Relatorio</label>
+                        <input type="text" class="form-control" name="report_number" placeholder="Número do Relatorio Semanal ou Técnico" value="{{ analise[0][3] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                    </div>
+
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="ticket_number" class="form-label">Num Mensagem</label>
+                        <input type="text" class="form-control" name="ticket_number" placeholder="Número da mensagem ou chamado" value="{{ analise[0][4] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} >
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        
+        
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <label for="btl" class="form-label">Batalhão</label>        
+                    <select class="form-select" name="btl" id="btl_select" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
+                        <option selected>Teste</option>
+                        
+                        <option value="testebtl"
+                                data-cpa="testecpa"
+                        >
+                        Testebtl
+                        </option>
+                                          
+                    </select>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="cpa" class="form-label">CPA</label>
+                        <!-- Campo com preenchimento automatico -->
+                        <input type="text" class="form-control" name="cpa" id="cpa_input" placeholder="CPA / Grande Comando" value="testecpa" {{ 'disabled' if edit_mode else '' }} readonly required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="cia" class="form-label">Cia</label>
+                        <input type="text" class="form-control" name="cia" placeholder="Cia" value="{{ analise[0][8] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h3>Descrição do Incidente</h3>
+                    <div class="form-floating">
+                        
+                        <textarea class="form-control" placeholder="Descrição do Incidente -  Como? Quando? Quando? O que? Por que? medidas tomadas" style="height: 300px;" name="description" id="description" {{ 'disabled' if edit_mode else '' }}>{{ analise[0][9] if analise else '' }}</textarea>
+                        <label for="description">Descrição do Incidente</label>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    
+        <!-- Card Observações -->
+        <!-- <div class="container mt-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Observações</h4>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addObsModal">
+                        Adicionar Observação
+                    </button>
+                </div>
+                <div class="card-body">
+                
+                        <ul class="list-group">
+                            
+                                <li class="list-group-item">
+                                    <p class="mb-1">texto_observacao </p>
+                                    <small class="text-muted">
+                                        Por autor_obs.username  em data_observacao
+                                    </small>
+                                </li>
+                            
+                        </ul>
+                    
+                        <p class="text-muted">Nenhuma observação foi adicionada ainda.</p>
+                    
+                </div>
+            </div>
+        
+
+            <div class="modal fade" id="addObsModal" tabindex="-1" aria-labelledby="addObsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addObsModalLabel">Adicionar Nova Observação</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="texto_observacao" class="form-label">Observação</label>
+                                    <textarea class="form-control" id="texto_observacao" name="texto_observacao" rows="5" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Observação</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <!-- Card Observações -FIM -->
+
+    <div class="container mt-2">
+        <button type="submit" class="btn btn-primary mb-3" {{ 'hidden' if edit_mode else '' }} id="btnSalvar">Salvar</button>
+        {% if edit_mode %}
+        <button type="button" id="btnEditar" class="btn btn-secondary mb-3">Editar</button>
+        <button type="button" id="btnCancelar" class="btn btn-warning mb-3" {{ 'hidden' if edit_mode else '' }}>Cancelar</button>
+        
+        {% endif %}
+    </div>
+
+    
+
+        
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 {% endblock %}
+
+
+
+

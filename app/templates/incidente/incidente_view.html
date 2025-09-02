@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="container mt-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Detalhes do Incidente</h4>
+                    <div>
+                    <a href="" class="btn btn-warning me-2">Editar</a>
+                    <form action="" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </div>
+                </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><strong>ID:</strong> {{ incidente.id }}</h5>
+                    <h5 class="card-title"><strong>Status:</strong> {{ incidente.status_incident }}</h5>
+                    <h5 class="card-title"><strong>Tipo:</strong>{{ incidente.incident_type }}</h5>
+                    <p class="card-text"><strong>Data de Início:</strong> {{ incidente.start_date.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% if incidente.end_date %}
+                        <p class="card-text"><strong>Data de Encerramento:</strong> {{ incidente.end_date.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% endif %}
+                    <p class="card-text"><strong>Registrado por:</strong> {{ incidente.autor.username }}</p>
+                    <p class="card-text"><strong>Nº relatório:</strong> {{ incidente.report_number }}</p>
+                    <p class="card-text"><strong>Ticket:</strong> {{ incidente.ticket_number or 'N/A' }}</p>
+                    <p class="card-text"><strong>CPA:</strong> {{ incidente.cpa }}</p>
+                    <p class="card-text"><strong>Batalhão:</strong> {{ incidente.btl }}</p>
+                    <p class="card-text"><strong>Companhia:</strong> {{ incidente.cia or 'N/A' }}</p>
+                    <p class="card-text"><strong>Descrição:</strong> {{ incidente.description }}</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Card Observações -->
+        <div class="container mt-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Observações</h4>
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addObsModal">
+                        Adicionar Observação
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if incidente.obs_incidente %}
+                        <ul class="list-group">
+                                {% for obs in incidente.obs_incidente %}
+                                <li class="list-group-item">
+                                    <p class="mb-1">{{obs.texto_observacao}} </p>
+                                    <small class="text-muted">
+                                        Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} .
+                                    </small>
+                                </li>
+                                {% endfor %}
+                            
+                        </ul>
+                    {% else %}
+                    <p class="text-muted">Nenhuma observação foi adicionada ainda.</p>
+                    {% endif %}
+                </div>
+            </div>
+        
+            <!-- Modal Adicionar Observação -->
+
+            <div class="modal fade" id="addObsModal" tabindex="-1" aria-labelledby="addObsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addObsModalLabel">Adicionar Nova Observação</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('incidente.add_obs', incident_id=incidente.id) }}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="texto_observacao" class="form-label">Observação</label>
+                                    <textarea class="form-control" id="texto_observacao" name="texto_observacao" rows="5" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Observação</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Card Observações -FIM -->
+
+    <!-- <div class="row">
+        <div class="col-md-12">
+            <h4>Observações</h4>
+            {% if incidente.obs_incidente %}
+                <ul class="list-group">
+                    {% for obs in incidente.obs_incidente %}
+                        <li class="list-group-item">
+                            <p class="mb-1">{{ obs.texto_observacao }}</p>
+                            <small class="text-muted">Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </hr>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Nenhuma observação encontrada.</p>
+            {% endif %}
+        </div>
+
+    </div> -->
+</div>        
+{% endblock %}

@@ -30,17 +30,17 @@ class Incidente(db.Model):
     id = db.Column(db.Integer, primary_key=True) # ID do incidente
     incident_type = db.Column(db.String(100), nullable=False) # Tipo de incidente >>> posteriormente criar uma tabela de tipos de incidentes
     report_number = db.Column(db.String(50), nullable=False) # Número do relatório semanal ou relatorio técnico em que a análise foi feita
-    ticket = db.Column(db.String(50), nullable= True) # Número da mensagem enviada ou chamado aberto
+    ticket_number = db.Column(db.String(50), nullable= True) # Número da mensagem enviada ou chamado aberto
     cpa = db.Column(db.String(100), nullable=False) # grande comando ou diretoria
     btl = db.Column(db.String(100), nullable=False) # Batalhão ou unidade envolvida no incidente
     cia = db.Column(db.String(100), nullable=True) # Companhia envolvida no incidente
     description = db.Column(db.Text, nullable=False) # Descrição do incidente. Como? Quando? Onde? Quem? Por quê? Ações tomadas?
-    start_date = db.Column(db.DateTime) # Data de abertura da análise/incidente
+    start_date = db.Column(db.DateTime, nullable=False) # Data de abertura da análise/incidente
     end_date = db.Column(db.DateTime, nullable=True) # Data de encerramento da análise/incidente
-    status = db.Column(db.String(50), default='Em andamento') # Status da análise
+    status_incident = db.Column(db.String(50), default='Em andamento', nullable=False) # Status da análise
     
     # Chave estrangeira para o usuário que realizou a análise
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # Relacionamento: uma análise pode ter várias observações
     # 'lazy=True' significa que as observações serão carregadas sob demanda
@@ -50,18 +50,44 @@ class Incidente(db.Model):
         return f'<Incidente {self.incident_type} - {self.report_number}>'
     
     
-    class IncidenteObs(db.Model):
-        
-        # Modelo para a tabela de observações de análise
-        id = db.Column(db.Integer, primary_key=True)
-        texto_observacao = db.Column(db.Text, nullable=False)
-        data_observacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-        
-        # Chave estrangeira para o usuário que inseriu a observação
-        usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-        
-        # Chave estrangeira para a análise à qual a observação pertence
-        incidente_id = db.Column(db.Integer, db.ForeignKey('incidente.id'), nullable=False)
+class IncidenteObs(db.Model):
+    
+    # Modelo para a tabela de observações de análise
+    id = db.Column(db.Integer, primary_key=True)
+    texto_observacao = db.Column(db.Text, nullable=False)
+    data_observacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Chave estrangeira para o usuário que inseriu a observação
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Chave estrangeira para a análise à qual a observação pertence
+    incidente_id = db.Column(db.Integer, db.ForeignKey('incidente.id'), nullable=False)
 
-        def __repr__(self):
-            return f'<Observação {self.id}>'
+    def __repr__(self):
+        return f'<Observação {self.id}>'
+        
+class Unidades(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cpa = db.Column(db.String(100), nullable=False)
+    btl = db.Column(db.String(100), nullable=False)
+    
+
+    def __repr__(self):
+        return f'<Unidade {self.cpa} - {self.btl}>'
+class TipoIncidente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tipo_incidente = db.Column(db.String(100), nullable=False)
+    desc_incidente = db.Column(db.Text, nullable=True)
+    
+
+    def __repr__(self):
+        return f'<TipoIncidente {self.tipo_incidente} - {self.desc_incidente}>'
+
+class StatusIncidente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(50), nullable=False)
+    desc_status = db.Column(db.Text, nullable=True)
+    
+
+    def __repr__(self):
+        return f'<StatusIncidente {self.status} - {self.desc_status}>'
