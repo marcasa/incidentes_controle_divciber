@@ -10,8 +10,16 @@ def hash(txt):
     hash_obj = hashlib.sha256(txt.encode('utf-8'))
     return hash_obj.hexdigest()
     
+from flask_login import LoginManager, set_login_view # Importando o gerenciador de login
+import hashlib
+
+def hash(txt):
+    hash_obj = hashlib.sha256(txt.encode('utf-8'))
+    return hash_obj.hexdigest()
+    
 db = SQLAlchemy()
 lm = LoginManager()
+
 
 def create_app(config_class=DevelopmentConfig):
     
@@ -40,4 +48,6 @@ def create_app(config_class=DevelopmentConfig):
     #     return render_template('404.html'), 404
     
     return app # Retornando a instância da aplicação Flask
+
+
 
