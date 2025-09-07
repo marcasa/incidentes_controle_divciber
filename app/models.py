@@ -7,7 +7,6 @@ from flask_login import UserMixin # Importando UserMixin para integração com F
 from flask_login import UserMixin # Importando UserMixin para integração com Flask-Login
 
 class User(UserMixin,db.Model):
-class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True) # ID do usuário
     username = db.Column(db.String(100), unique=True, nullable=False) # Nome de usuário único
     email = db.Column(db.String(100), unique=True, nullable=False) # Email do usuário único
