@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <div class="container">
     <div class="row">
         <div class="container mt-2">
@@ -11,7 +10,7 @@
                     <div>
                     <a href="" class="btn btn-warning me-2">Editar</a>
                     <form action="" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">Excluir</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este incidente?');">Excluir</button>
                     </form>
                 </div>
                 </div>
@@ -55,8 +54,13 @@
                                 <li class="list-group-item">
                                     <p class="mb-1">{{obs.texto_observacao}} </p>
                                     <small class="text-muted">
-                                        Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} .
+                                        Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} - ID:{{ obs.id }}
                                     </small>
+                                    {%if obs.autor_obs == current_user or current_user.profile == 'Admin'%}
+                                    <form method="POST" action="{{ url_for('incidente.delete_obs', incident_id=incidente.id, obs_id=obs.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta observação?');">Excluir</button>
+                                    </form>
+                                    {%endif%}    
                                 </li>
                                 {% endfor %}
                             

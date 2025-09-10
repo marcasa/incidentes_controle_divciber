@@ -4,7 +4,7 @@ from datetime import datetime
 from app import db # Importando a instância do SQLAlchemy de app/__init__.py
 from werkzeug.security import generate_password_hash, check_password_hash # Importando funções para hash de senha
 from flask_login import UserMixin # Importando UserMixin para integração com Flask-Login
-from flask_login import UserMixin # Importando UserMixin para integração com Flask-Login
+
 
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True) # ID do usuário
@@ -12,10 +12,8 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False) # Email do usuário único
     profile = db.Column(db.String(50), nullable=False) # Perfil do usuário (admin, user ou viewer)
     password = db.Column(db.String(256), nullable=False) # Hash da senha do usuário
-    profile = db.Column(db.String(50), nullable=False) # Perfil do usuário (admin, user ou viewer)
-    password = db.Column(db.String(256), nullable=False) # Hash da senha do usuário
     
-    # Relacionamento: um usuário pode ter várias análises e várias observações
+    
     # Relacionamento: um usuário pode ter várias análises e várias observações
     # 'backref' permite acessar o usuário a partir da análise (ex: analise.autor)
     incidente = db.relationship('Incidente', backref='autor', lazy=True)

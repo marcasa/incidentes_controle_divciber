@@ -4,17 +4,16 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('main.home')}}">Inicio</a>
+                <a class="nav-link active" aria-current="page" href="{{ url_for('main.home')}}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="">Usuarios</a>
+                <a class="nav-link" href="{{ url_for('incidente.incidents_list')}}">Incidentes</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="">Analises</a>
-          </li>
+            
             
         </ul>
         <ul class="navbar-nav">
+                <p class="nav-link">{{current_user.username}} </p>
                 <li class="nav-item">
                     <a class="nav-link" href="{{  url_for('users.login')}}">Login</a>
                 </li>

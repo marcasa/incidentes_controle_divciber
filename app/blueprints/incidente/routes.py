@@ -12,8 +12,8 @@ from datetime import datetime
 @login_required
 def incidents_list():
     # Rota para listar todas as análises
-    analises = "Hello world"
-    return render_template('incidente/incidentes.html', title="Incidentes", analises = analises)
+    incidentes = Incidente.query.all()
+    return render_template('incidente/incidentes.html', title="Incidentes Registrados", incidentes = incidentes)
 
 #=================================REGISTRAR NOVO INCIDENTE=================================
 @incidente_bp.route("/incidente/new", methods=['GET', 'POST'])
@@ -71,6 +71,40 @@ def new_incident():
         
     return render_template('incidente/new_incident.html', title="Registro de Incidente")
 
+#=================================EDITAR INCIDENTE=================================
+@incidente_bp.route("/incidente/<int:incident_id>/edit", methods=['GET', 'POST'])
+@login_required
+def edit_incident(incident_id):
+    # Rota para editar um incidente
+    incident = Incidente.query.get_or_404(incident_id)
+    if request.method == 'POST':
+        # recebendo dados do formulário
+        incident.status_incident = request.form['status_incidente'] #notnull
+        incident.start_date = request.form['start_data_hora'] #notnull
+        incident.incident_type = request.form['incident_type'] #notnull
+        incident.report_number = request.form['report_number'] #notnull
+        incident.ticket_number = request.form['ticket_number']
+        incident.btl = request.form['btl'] #notnull
+        incident.cpa = request.form['cpa'] #notnull
+        incident.cia = request.form['cia']
+        incident.description = request.form['description'] #notnull
+        
+        # Verifica os campos obrigatórios
+        if not all([incident.status_incident, incident.start_date, incident.incident_type, incident.report_number, incident.btl, incident.cpa, incident.description]):
+            flash('Erro: Os campos obrigatórios devem ser preenchidos.', 'danger')
+            return redirect(url_for('incidente.edit_incident', incident_id=incident_id))
+        
+        # Convertendo campos de data para datetime
+        incident.start_date = datetime.strptime(incident.start_date, '%Y-%m-%dT%H:%M')
+        # if incident.end_date:
+        #     incident.end_date = datetime.strptime(incident.end_date, '%Y-%m-%dT%H:%M')
+        # else:
+        #     incident.end_date = None
+        
+        # Adicionando e comitando no banco de dados
+        db.session.commit()
+        flash('Incidente editado com sucesso!', 'success')
+        return redirect(url_for('incidente.incident_view', incident_id=incident_id))
 #=================================ADD OBSERVAÇÃO=================================
 @incidente_bp.route("/incidente/<int:incident_id>/add_obs", methods=['POST'])
 @login_required
@@ -85,6 +119,19 @@ def add_obs(incident_id):
     db.session.add(new_obs)
     db.session.commit()
     flash('Observação adicionada com sucesso!', 'success')
+    return redirect(url_for('incidente.incident_view', incident_id=incident_id))
+
+
+#=================================EXCLUIR OBSERVAÇÃO=================================
+@incidente_bp.route("/incidente/<int:incident_id>/delete_obs/<int:obs_id>", methods=['POST'])
+@login_required
+def delete_obs(incident_id, obs_id):
+    # Rota para excluir observação
+    obs = IncidenteObs.query.get_or_404(obs_id)
+
+    db.session.delete(obs)
+    db.session.commit()
+    flash('Observação excluida com sucesso!', 'success')
     return redirect(url_for('incidente.incident_view', incident_id=incident_id))
                     
                     
