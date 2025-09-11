@@ -12,11 +12,19 @@
                 <div class="col">
                     <div class="mb-3">
                         <label for="status_incidente" class="form-label"><strong>Status</strong></label>        
-                        <select class="form-select" name="status_incidente" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
-                            <option selected>testestatus</option>
-                            testestatus
-                            <option value="testestatus">
-                            testestatus
+                        <select class="form-select" name="status_incidente" aria-label="Default select example" >
+                            <option selected>{{ incident.status_incident if incident else 'Selecione o Status' }}</option>
+                            <option value="Aberto">
+                            Aberto
+                            </option>
+                            <option value="Em Andamento">
+                            Em Andamento
+                            </option>
+                            <option value="Concluido">
+                            Concluido
+                            </option>
+                            <option value="Cancelado">
+                            Cancelado
                             </option>
                                                
                     </select>
@@ -31,17 +39,22 @@
                         <label for="start_data_hora" class="form-label">Data/Hora Registro</label>
                         <input type="datetime-local" class="form-control" 
                         name="start_data_hora" 
-                        placeholder="Data" 
-                        value="{{analise[0][1] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                        placeholder="Data/Hora Registro" 
+                        value="{{ incident.start_date if incident else '' }}" required>
                     </div>
                 </div>
                 <div class="col">
                     <label for="incident_type" class="form-label">Tipo de Incidente</label>        
-                    <select class="form-select" name="incident_type" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
-                        <option selected>testetpcincident</option>
-                        testetpcincident
-                        <option value="testetpcincident">
-                        testetpcincident
+                    <select class="form-select" name="incident_type" aria-label="Default select example">
+                        <option selected>{{ incident.incident_type if incident else 'Selecione o Tipo de Incidente' }}</option>
+                        <option value="Phishing">
+                        Phishing
+                        </option>
+                        <option value="Malware">
+                        Malware
+                        </option>
+                        <option value="Outros">
+                        Outros
                         </option>
                                           
                     </select>
@@ -55,14 +68,14 @@
                 <div class="col">
                     <div class="mb-3">
                         <label for="report_number" class="form-label">Num Relatorio</label>
-                        <input type="text" class="form-control" name="report_number" placeholder="Número do Relatorio Semanal ou Técnico" value="{{ analise[0][3] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                        <input type="text" class="form-control" name="report_number" placeholder="Número do Relatorio Semanal ou Técnico" value="{{ incident.report_number if incident else '' }}" required>
                     </div>
 
                 </div>
                 <div class="col">
                     <div class="mb-3">
                         <label for="ticket_number" class="form-label">Num Mensagem</label>
-                        <input type="text" class="form-control" name="ticket_number" placeholder="Número da mensagem ou chamado" value="{{ analise[0][4] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} >
+                        <input type="text" class="form-control" name="ticket_number" placeholder="Número da mensagem ou chamado" value="{{ incident.ticket_number if incident else '' }}"  >
                     </div>
 
                 </div>
@@ -77,13 +90,23 @@
             <div class="row">
                 <div class="col">
                     <label for="btl" class="form-label">Batalhão</label>        
-                    <select class="form-select" name="btl" id="btl_select" aria-label="Default select example" {{ 'disabled' if edit_mode else '' }}>
-                        <option selected>Teste</option>
+                    <select class="form-select" name="btl" id="btl_select" aria-label="Default select example" >
+                        <option selected>{{ incident.btl if incident else 'Selecione o Batalhão' }}</option>
                         
                         <option value="testebtl"
                                 data-cpa="testecpa"
                         >
-                        Testebtl
+                        1º BPM/M
+                        </option>
+                        <option value="testebtl"
+                                data-cpa="testecpa"
+                        >
+                        2º BPM/M
+                        </option>
+                        <option value="testebtl"
+                                data-cpa="testecpa"
+                        >
+                        3º BPM/M
                         </option>
                                           
                     </select>
@@ -92,13 +115,13 @@
                     <div class="mb-3">
                         <label for="cpa" class="form-label">CPA</label>
                         <!-- Campo com preenchimento automatico -->
-                        <input type="text" class="form-control" name="cpa" id="cpa_input" placeholder="CPA / Grande Comando" value="testecpa" {{ 'disabled' if edit_mode else '' }} readonly required>
+                        <input type="text" class="form-control" name="cpa" id="cpa_input" placeholder="CPA / Grande Comando" value="{{ incident.cpa if incident else '' }}" readonly required>
                     </div>
                 </div>
                 <div class="col">
                     <div class="mb-3">
                         <label for="cia" class="form-label">Cia</label>
-                        <input type="text" class="form-control" name="cia" placeholder="Cia" value="{{ analise[0][8] if analise else '' }}" {{ 'disabled' if edit_mode else '' }} required>
+                        <input type="text" class="form-control" name="cia" placeholder="Cia" value="{{ incident.cia if incident else '' }}" >
                     </div>
                 </div>
 
@@ -112,7 +135,7 @@
                     <h3>Descrição do Incidente</h3>
                     <div class="form-floating">
                         
-                        <textarea class="form-control" placeholder="Descrição do Incidente -  Como? Quando? Quando? O que? Por que? medidas tomadas" style="height: 300px;" name="description" id="description" {{ 'disabled' if edit_mode else '' }}>{{ analise[0][9] if analise else '' }}</textarea>
+                        <textarea class="form-control" placeholder="Descrição do Incidente -  Como? Quando? Quando? O que? Por que? medidas tomadas" style="height: 300px;" name="description" id="description" >{{ incident.description if incident else '' }}</textarea>
                         <label for="description">Descrição do Incidente</label>
                     </div>
 
@@ -174,11 +197,11 @@
         <!-- Card Observações -FIM -->
 
     <div class="container mt-2">
-        <button type="submit" class="btn btn-primary mb-3" {{ 'hidden' if edit_mode else '' }} id="btnSalvar">Salvar</button>
-        {% if edit_mode %}
-        <button type="button" id="btnEditar" class="btn btn-secondary mb-3">Editar</button>
-        <button type="button" id="btnCancelar" class="btn btn-warning mb-3" {{ 'hidden' if edit_mode else '' }}>Cancelar</button>
         
+        {% if edit_mode %}
+        <button type="submit" class="btn btn-primary mb-3"  id="btnSalvar" onclick="return confirm('Tem certeza de que deseja salvar as alterações?')">Salvar Alterações</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary mb-3"  id="btnSalvar" >Registrar Incidente</button>
         {% endif %}
     </div>
 

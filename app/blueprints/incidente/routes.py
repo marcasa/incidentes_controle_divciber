@@ -76,7 +76,11 @@ def new_incident():
 @login_required
 def edit_incident(incident_id):
     # Rota para editar um incidente
+    
+    #carregando dados do incidente registrado pelo id
     incident = Incidente.query.get_or_404(incident_id)
+    
+    # Veririfica o metodo da requisição, se for POST, atualiza os dados
     if request.method == 'POST':
         # recebendo dados do formulário
         incident.status_incident = request.form['status_incidente'] #notnull
@@ -105,6 +109,11 @@ def edit_incident(incident_id):
         db.session.commit()
         flash('Incidente editado com sucesso!', 'success')
         return redirect(url_for('incidente.incident_view', incident_id=incident_id))
+    
+    edit_mode = True  # Indicador de modo de edição para o template
+    # Se for GET, renderiza o formulário com os dados atuais
+    return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode)
+    
 #=================================ADD OBSERVAÇÃO=================================
 @incidente_bp.route("/incidente/<int:incident_id>/add_obs", methods=['POST'])
 @login_required
