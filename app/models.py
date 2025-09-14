@@ -50,7 +50,7 @@ class Incidente(db.Model):
     
     # Relacionamento: uma análise pode ter várias observações
     # 'lazy=True' significa que as observações serão carregadas sob demanda
-    obs_incidente = db.relationship('IncidenteObs', backref='incidente', lazy=True)
+    obs_incidente = db.relationship('IncidenteObs', backref='incidente', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Incidente {self.incident_type} - {self.report_number}>'
@@ -61,7 +61,7 @@ class IncidenteObs(db.Model):
     # Modelo para a tabela de observações de análise
     id = db.Column(db.Integer, primary_key=True)
     texto_observacao = db.Column(db.Text, nullable=False)
-    data_observacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    data_observacao = db.Column(db.DateTime, nullable=False, default=datetime.now)
     
     # Chave estrangeira para o usuário que inseriu a observação
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -97,3 +97,5 @@ class StatusIncidente(db.Model):
 
     def __repr__(self):
         return f'<StatusIncidente {self.status} - {self.desc_status}>'
+    
+    

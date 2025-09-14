@@ -5,6 +5,7 @@
 <div class="container">
 
     <h2>{{ title }}</h2>
+
     <form method="post">
         
         <div class="container ">
@@ -14,18 +15,17 @@
                         <label for="status_incidente" class="form-label"><strong>Status</strong></label>        
                         <select class="form-select" name="status_incidente" aria-label="Default select example" >
                             <option selected>{{ incident.status_incident if incident else 'Selecione o Status' }}</option>
-                            <option value="Aberto">
-                            Aberto
-                            </option>
-                            <option value="Em Andamento">
-                            Em Andamento
-                            </option>
-                            <option value="Concluido">
-                            Concluido
-                            </option>
-                            <option value="Cancelado">
-                            Cancelado
-                            </option>
+                            {% if incident %}
+                                {% for status in status_incident_list %}
+                                <option value="{{status.status}}">
+                                {{status.status}}
+                                </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="Aberto/Novo">
+                                Aberto/Novo
+                                </option>
+                            {% endif %}
                                                
                     </select>
 
@@ -93,21 +93,14 @@
                     <select class="form-select" name="btl" id="btl_select" aria-label="Default select example" >
                         <option selected>{{ incident.btl if incident else 'Selecione o Batalhão' }}</option>
                         
-                        <option value="testebtl"
-                                data-cpa="testecpa"
+                        {% for unidade in unidades %}
+                        <option value="{{unidade.btl}}"
+                                data-cpa="{{unidade.cpa}}"
                         >
-                        1º BPM/M
+                        {{unidade.btl}}
                         </option>
-                        <option value="testebtl"
-                                data-cpa="testecpa"
-                        >
-                        2º BPM/M
-                        </option>
-                        <option value="testebtl"
-                                data-cpa="testecpa"
-                        >
-                        3º BPM/M
-                        </option>
+                        {% endfor %}
+                        
                                           
                     </select>
                 </div>

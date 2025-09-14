@@ -2,10 +2,17 @@
 
 from flask import render_template, url_for, flash, redirect, request
 from app.blueprints.incidente import incidente_bp
-from app.models import Incidente, User, IncidenteObs
+from app.models import Incidente, User, IncidenteObs, Unidades, StatusIncidente
 from app import db
 from flask_login import login_required, current_user
 from datetime import datetime
+
+
+
+################################################################################
+#=================================ROTAS INCIDENTE========================
+################################################################################
+
 
 #=================================LISTAR INCIDENTES=================================
 @incidente_bp.route("/incidentes")
@@ -66,10 +73,11 @@ def new_incident():
         db.session.add(new_incident)
         db.session.commit()
         flash('Incidente registrado com sucesso!', 'success')
-        return redirect(url_for('main.home')) #alterar para lista de incidentes
+        return redirect(url_for('incidente.incidents_list')) #alterar para lista de incidentes
         
-        
-    return render_template('incidente/new_incident.html', title="Registro de Incidente")
+    unidades = Unidades.query.all() # Carrega os dados da tabela unidades para o formulário
+    status_incident_list = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário    
+    return render_template('incidente/new_incident.html', title="Registro de Incidente", unidades= unidades , status_incident_list=status_incident_list)
 
 #=================================EDITAR INCIDENTE=================================
 @incidente_bp.route("/incidente/<int:incident_id>/edit", methods=['GET', 'POST'])
@@ -82,7 +90,22 @@ def edit_incident(incident_id):
     
     # Veririfica o metodo da requisição, se for POST, atualiza os dados
     if request.method == 'POST':
-        # recebendo dados do formulário
+        
+        #Armazenando os dados oriinais antes da edição
+        original_data = {
+            'status_incident': incident.status_incident,
+            'start_date': incident.start_date,
+            'incident_type': incident.incident_type,
+            'report_number': incident.report_number,
+            'ticket_number': incident.ticket_number,
+            'btl': incident.btl,
+            'cpa': incident.cpa,
+            'cia': incident.cia,
+            'description': incident.description
+        }
+        
+                  
+        # Atualiza o objeto incidente com os novos dados do formulário
         incident.status_incident = request.form['status_incidente'] #notnull
         incident.start_date = request.form['start_data_hora'] #notnull
         incident.incident_type = request.form['incident_type'] #notnull
@@ -105,15 +128,50 @@ def edit_incident(incident_id):
         # else:
         #     incident.end_date = None
         
+        #VERIFICANDO QUAIS CAMPOS FORAM MODIFICADOS
+        changes = []
+        campos = ['status_incident', 'start_date', 'incident_type', 'report_number', 'ticket_number', 'btl', 'cpa', 'cia', 'description']
+        
+        for key, new_value in incident.__dict__.items():
+            original_value = original_data.get(key)
+            if new_value != str(original_value):
+                if key in campos:
+                    changes.append(f"{key} alterado de '{original_value}' para '{new_value}' \n")  
+        
+        if changes:
+            txt_obs = "Alterações realizadas:\n" + "\n".join(changes)
+            new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=current_user.id, texto_observacao=txt_obs, data_observacao=datetime.now())        
+        
+        # Adicionando a observação de alterações no incidente
+        db.session.add(new_obs)
+        
         # Adicionando e comitando no banco de dados
         db.session.commit()
         flash('Incidente editado com sucesso!', 'success')
         return redirect(url_for('incidente.incident_view', incident_id=incident_id))
     
     edit_mode = True  # Indicador de modo de edição para o template
+    unidades = Unidades.query.all() # Carrega os dados da tabela unidades para o formulário
+    status_incident_list = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário
     # Se for GET, renderiza o formulário com os dados atuais
-    return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode)
+    return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode, unidades=unidades, status_incident_list=status_incident_list)
+
+#================================EXCLUIR INCIDENTE=================================
+@incidente_bp.route("/incidente/delete/<int:incident_id>", methods=['POST'])
+@login_required 
+def delete_incident(incident_id):
+    # Rota para excluir um incidente
+    incident = Incidente.query.get_or_404(incident_id)
+    db.session.delete(incident)
+    db.session.commit()
+    flash('Incidente excluído com sucesso!', 'success')
+    return redirect(url_for('incidente.incidents_list'))   
     
+################################################################################
+#===============================OBSERVAÇÕES DO INCIDENTE========================
+################################################################################
+
+
 #=================================ADD OBSERVAÇÃO=================================
 @incidente_bp.route("/incidente/<int:incident_id>/add_obs", methods=['POST'])
 @login_required

@@ -9,7 +9,7 @@
                     <h4>Detalhes do Incidente</h4>
                     <div>
                     <a href="{{ url_for('incidente.edit_incident', incident_id=incidente.id) }}" class="btn btn-warning me-2">Editar</a>
-                    <form action="" method="POST" style="display:inline;">
+                    <form method="POST" action="{{ url_for('incidente.delete_incident', incident_id=incidente.id)  }}" style="display:inline;">
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este incidente?');">Excluir</button>
                     </form>
                 </div>
