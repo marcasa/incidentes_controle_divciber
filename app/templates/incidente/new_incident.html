@@ -47,15 +47,11 @@
                     <label for="incident_type" class="form-label">Tipo de Incidente</label>        
                     <select class="form-select" name="incident_type" aria-label="Default select example">
                         <option selected>{{ incident.incident_type if incident else 'Selecione o Tipo de Incidente' }}</option>
-                        <option value="Phishing">
-                        Phishing
+                        {% for tp_incidente in incidents_types %}
+                        <option value="{{tp_incidente.tipo_incidente}}">
+                        {{tp_incidente.tipo_incidente}}
                         </option>
-                        <option value="Malware">
-                        Malware
-                        </option>
-                        <option value="Outros">
-                        Outros
-                        </option>
+                        {% endfor %}
                                           
                     </select>
                 </div>

@@ -9,8 +9,10 @@ from flask_login import UserMixin # Importando UserMixin para integração com F
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True) # ID do usuário
     username = db.Column(db.String(100), unique=True, nullable=False) # Nome de usuário único
+    name = db.Column(db.String(100), unique=True, nullable=False) # Nome de usuário único
     email = db.Column(db.String(100), unique=True, nullable=False) # Email do usuário único
     profile = db.Column(db.String(50), nullable=False) # Perfil do usuário (admin, user ou viewer)
+    is_temp_password = db.Column(db.Boolean, default=True, nullable=False)
     password = db.Column(db.String(256), nullable=False) # Hash da senha do usuário
     
     

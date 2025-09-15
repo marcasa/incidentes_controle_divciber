@@ -1,10 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light ">
-    <div class="container-fluid container">
-      <a class="navbar-brand" href="/">Divciber</a>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<nav class="navbar navbar-expand-lg navbar-light text-white  " style="background-color: #155eca;" data-bs-theme="dark" >
+    <div class="container-fluid container text-white">
+        <a class="navbar-brand" href="{{ url_for('main.home')}}">
+            <img src="{{url_for('static', filename='img/logo_divciber.png')}}"  class="d-inline-block align-text-center" alt="Bootstrap" style="max-width: 150px; height: auto;">
+            Divciber
+        </a>
+       
+      <div class="collapse navbar-collapse text-white" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-white">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('main.home')}}">Home</a>
+                <a class="nav-link " aria-current="page" href="{{ url_for('main.home')}}">Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('incidente.incidents_list')}}">Incidentes</a>
@@ -12,17 +16,28 @@
             
             
         </ul>
-        <ul class="navbar-nav">
-                <p class="nav-link">{{current_user.username}} </p>
+        <ul class="navbar-nav" >
+                
+                {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{  url_for('users.login')}}">Login</a>
+                    <a class="nav-link active" href="#">Olá, {{current_user.name}}</a>
                 </li>
+                {% if current_user.profile == 'Admin' %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('users.register') }}">Registro</a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.logout') }}">| Sair</a>
                 </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{  url_for('users.login')}}">Login</a>
+                </li>
+                
+                {% endif %}
+                
+                
             </ul>
         
       </div>

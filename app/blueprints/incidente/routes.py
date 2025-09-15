@@ -2,10 +2,11 @@
 
 from flask import render_template, url_for, flash, redirect, request
 from app.blueprints.incidente import incidente_bp
-from app.models import Incidente, User, IncidenteObs, Unidades, StatusIncidente
+from app.models import Incidente, User, IncidenteObs, Unidades, StatusIncidente, TipoIncidente
 from app import db
 from flask_login import login_required, current_user
 from datetime import datetime
+from sqlalchemy import or_
 
 
 
@@ -42,6 +43,7 @@ def new_incident():
         # Usuário logado
         user_id = current_user.id
         
+        print(f"Status Incidente: {status_incident}\nStart Date: {start_date}\nIncident Type: {incident_type}\nreport_number: {report_number}\nTicket Number: {ticket_number}\nBTL: {btl}\nCPA: {cpa}\nCIA: {cia}\nDescription: {description}\nUser ID: {user_id}")
         # Verifica os campos obrigatórios
         if not all([status_incident, start_date, incident_type, report_number,btl, cpa, description]):
             flash('Erro: Os campos obrigatórios devem ser preenchidos.', 'danger')
@@ -76,8 +78,9 @@ def new_incident():
         return redirect(url_for('incidente.incidents_list')) #alterar para lista de incidentes
         
     unidades = Unidades.query.all() # Carrega os dados da tabela unidades para o formulário
+    incidents_types = TipoIncidente.query.all()# Carrega os dados da tabela TipoIncidente para o formulário
     status_incident_list = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário    
-    return render_template('incidente/new_incident.html', title="Registro de Incidente", unidades= unidades , status_incident_list=status_incident_list)
+    return render_template('incidente/new_incident.html', title="Registro de Incidente", unidades= unidades , status_incident_list=status_incident_list, incidents_types=incidents_types)
 
 #=================================EDITAR INCIDENTE=================================
 @incidente_bp.route("/incidente/<int:incident_id>/edit", methods=['GET', 'POST'])
@@ -140,7 +143,7 @@ def edit_incident(incident_id):
         
         if changes:
             txt_obs = "Alterações realizadas:\n" + "\n".join(changes)
-            new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=current_user.id, texto_observacao=txt_obs, data_observacao=datetime.now())        
+            new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=4, texto_observacao=txt_obs, data_observacao=datetime.now()) #Usuário ID 1 -Sistema        
         
         # Adicionando a observação de alterações no incidente
         db.session.add(new_obs)
@@ -152,9 +155,10 @@ def edit_incident(incident_id):
     
     edit_mode = True  # Indicador de modo de edição para o template
     unidades = Unidades.query.all() # Carrega os dados da tabela unidades para o formulário
+    incidents_types = TipoIncidente.query.all()# Carrega os dados da tabela TipoIncidente para o formulário
     status_incident_list = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário
     # Se for GET, renderiza o formulário com os dados atuais
-    return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode, unidades=unidades, status_incident_list=status_incident_list)
+    return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode, unidades=unidades, status_incident_list=status_incident_list, incidents_types=incidents_types)
 
 #================================EXCLUIR INCIDENTE=================================
 @incidente_bp.route("/incidente/delete/<int:incident_id>", methods=['POST'])
@@ -166,6 +170,40 @@ def delete_incident(incident_id):
     db.session.commit()
     flash('Incidente excluído com sucesso!', 'success')
     return redirect(url_for('incidente.incidents_list'))   
+
+
+
+
+
+#=================================PESQUISAR INCIDENTE=================================
+@incidente_bp.route("/incidente/pesquisar", methods=['GET'])
+@login_required
+def search_incident():
+    # Rota para pesquisar incidentes
+    
+    termo = request.args.get('termo', '') # Pega o termo de pesquisa do formulário
+    
+    # Se não houver termo de pesquisa, redireciona para a lista de incidentes
+    if not termo:
+        return redirect(url_for('incidente.incidents_list'))
+    
+    query = Incidente.query
+    search_terms = f"%{termo}%"
+    
+    filters = [
+        Incidente.incident_type.ilike(search_terms),
+        Incidente.report_number.ilike(search_terms),
+        Incidente.ticket_number.ilike(search_terms),
+        Incidente.btl.ilike(search_terms),
+        Incidente.cpa.ilike(search_terms),
+        Incidente.cia.ilike(search_terms),
+        Incidente.description.ilike(search_terms),
+    ]
+    
+    resultados = query.filter(or_(*filters)).all()
+    
+    return render_template('incidente/incidentes.html', title=f"Resultados da pesquisa para: {termo}", incidentes=resultados)
+
     
 ################################################################################
 #===============================OBSERVAÇÕES DO INCIDENTE========================

@@ -10,8 +10,12 @@
             <div class="card-body">
                 <form method="POST" action="#">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Usuário</label>
+                        <label for="username" class="form-label">Usuário (RE)</label>
                         <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
@@ -41,7 +45,7 @@
             </div>
             <div class="card-footer text-center">
                 <small class="text-muted">
-                    Já tem uma conta? <a href="#">Faça login</a>
+                    Já tem uma conta? <a href="{{ url_for('users.login') }}">Faça login</a>
                 </small>
             </div>
         </div>

@@ -24,7 +24,7 @@
                     {% if incidente.end_date %}
                         <p class="card-text"><strong>Data de Encerramento:</strong> {{ incidente.end_date.strftime('%d/%m/%Y %H:%M') }}</p>
                     {% endif %}
-                    <p class="card-text"><strong>Registrado por:</strong> {{ incidente.autor.username }}</p>
+                    <p class="card-text"><strong>Registrado por:</strong> {{ incidente.autor.name }}</p>
                     <p class="card-text"><strong>Nº relatório:</strong> {{ incidente.report_number }}</p>
                     <p class="card-text"><strong>Ticket:</strong> {{ incidente.ticket_number or 'N/A' }}</p>
                     <p class="card-text"><strong>CPA:</strong> {{ incidente.cpa }}</p>
@@ -47,28 +47,36 @@
                         Adicionar Observação
                     </button>
                 </div>
-                <div class="card-body">
-                    {% if incidente.obs_incidente %}
-                        <ul class="list-group">
-                                {% for obs in incidente.obs_incidente %}
-                                <li class="list-group-item">
-                                    <p class="mb-1">{{obs.texto_observacao}} </p>
-                                    <small class="text-muted">
-                                        Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} - ID:{{ obs.id }}
-                                    </small>
-                                    {%if obs.autor_obs == current_user or current_user.profile == 'Admin'%}
-                                    <form method="POST" action="{{ url_for('incidente.delete_obs', incident_id=incidente.id, obs_id=obs.id) }}" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta observação?');">Excluir</button>
-                                    </form>
-                                    {%endif%}    
-                                </li>
-                                {% endfor %}
-                            
-                        </ul>
-                    {% else %}
-                    <p class="text-muted">Nenhuma observação foi adicionada ainda.</p>
-                    {% endif %}
+                {% if incidente.obs_incidente %}
+                {% for obs in incidente.obs_incidente %}
+                <div class="card m-2">
+                    <div class="card-header">
+                        <div class="card-body">
+                            {% if edit_mode %}
+                                <h5 class="card-title">Alteração</h5>
+                            {% else %}
+                                <h5 class="card-title">Observação</h5>
+                            {% endif %}
+                            <p class="card-text">{{obs.texto_observacao}}</p>
+                            <small class="text-muted">
+                                Por {{ obs.autor_obs.name }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} - ID:{{ obs.id }}
+                            </small>
+                            {%if obs.autor_obs == current_user or current_user.profile == 'Admin'%}
+                            <form method="POST" action="{{ url_for('incidente.delete_obs', incident_id=incidente.id, obs_id=obs.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta observação?');">Excluir</button>
+                            </form>
+                            {%endif%}
+                        </div>
+
+                    </div>
+
                 </div>
+                {% endfor %}
+                {% else %}
+                    <p class="text-muted">Nenhuma observação foi adicionada ainda.</p>
+                {% endif %}
+                
+                
             </div>
         
             <!-- Modal Adicionar Observação -->

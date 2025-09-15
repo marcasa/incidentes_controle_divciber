@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Bem Vindo, {{ current_user.username }}</h2>
-<h2>ID {{ current_user.id }}</h2>
-<h3>Perfil: {{ current_user.profile }}</h3>
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Bem-vindo, {{ current_user.name }}.    </h1>
+    </div>
+
+</div>
+<div class="row text-center">
+    <img src="{{ url_for('static', filename='img/logo_divciber.png') }}" class="rounded mx-auto d-block" alt="Logo"  style="max-width: 1200px; height: auto;" >
+
+</div>
 
 
 {% endblock %}

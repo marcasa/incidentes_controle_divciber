@@ -1,38 +1,72 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>{{title }}</h2>
-<a href="{{ url_for('incidente.new_incident') }}" class="btn btn-primary" action="url_for('incidente.new_incident')">Registrar novo incidente</a>
-<table class="table table-bordered">
-    <thead>
-        <th>ID</th>
-        <th>Tipo de Incidente</th>
-        <th>Data abertura</th>
-        <th>Nº Relatório</th>
-        <th>Nº Ticket</th>
-        <th>CPA</th>
-        <th>BTL</th>
-        <th>Companhia</th>
-        <th>Status</th>
-        <th>Visualizar</th>
-        <!-- <th>Deletar</th> -->
-    </thead>
-    <tbody>
-        {% for incidente in incidentes %}
-        <tr>
-            <td>{{incidente.id}}</td>
-            <td>{{incidente.incident_type}}</td>
-            <td>{{incidente.start_date.strftime("%d/%m/%Y %H:%M")}}</td>
-            <td>{{incidente.report_number}}</td>
-            <td>{{incidente.ticket_number}}</td>
-            <td>{{incidente.cpa}}</td>
-            <td>{{incidente.btl}}</td>
-            <td>{{incidente.cia}}</td>
-            <td>{{incidente.status_incident}}</td>
-            <td><a href="{{url_for('incidente.incident_view', incident_id=incidente.id)}}" class="btn btn-warning btn-sm">Visualizar</a></td>
-            <!-- <td><a href="" class="btn btn-danger btn-sm">Deletar</a></td> -->
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <h2>{{ title }}</h2>
+
+    <div class="row mb-3 mx-auto">
+        <div class="col-md-6">
+            <a href="{{ url_for('incidente.new_incident') }}" class="btn btn-primary" action="url_for('incidente.new_incident')">Registrar novo incidente</a>
+
+        </div>
+        <div class="col-md-6 " >
+            
+            <form action="{{ url_for('incidente.search_incident') }}" method="GET" >
+                <div class="input-group">
+                    
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Pesquisar incidentes..." name="termo">
+                    <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+
+    <table class="table table-bordereds table-hover align-middle text-center">
+        <thead class="table-dark align-middle ">
+            <th>ID</th>
+            <th>Tipo de Incidente</th>
+            <th>Data abertura</th>
+            <th>Nº Relatório</th>
+            <th>Nº Ticket</th>
+            <th>CPA</th>
+            <th>BTL</th>
+            <th>Companhia</th>
+            <th>Status</th>
+            <th>Visualizar</th>
+            <!-- <th>Deletar</th> -->
+        </thead>
+        <tbody>
+            {% for incidente in incidentes %}
+                {% set row_class = '' %}
+                {% if incidente.status_incident == 'Resolvido' %}
+                    {% set row_class = 'table-success' %}
+                {% elif incidente.status_incident == 'Aguardando Informação/Ação Externa'  %}
+                    {% set row_class = 'table-info' %}
+                {% elif incidente.status_incident == 'Aberto/Novo' or incidente.status_incident == 'Em Análise' %}
+                    {% set row_class = 'table-warning' %}
+                {% endif %}
+            <tr class="{{ row_class }}">
+                <td>{{incidente.id}}</td>
+                <td>{{incidente.incident_type}}</td>
+                <td>{{incidente.start_date.strftime("%d/%m/%Y %H:%M")}}</td>
+                <td>{{incidente.report_number}}</td>
+                <td>{{incidente.ticket_number}}</td>
+                <td>{{incidente.cpa}}</td>
+                <td>{{incidente.btl}}</td>
+                <td>{{incidente.cia}}</td>
+                <td>{{incidente.status_incident}}</td>
+                <td><a href="{{url_for('incidente.incident_view', incident_id=incidente.id)}}" class="btn btn-warning btn-sm">Visualizar</a></td>
+                <!-- <td><a href="" class="btn btn-danger btn-sm">Deletar</a></td> -->
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 
         
         

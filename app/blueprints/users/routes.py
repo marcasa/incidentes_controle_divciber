@@ -4,7 +4,7 @@ from flask import render_template, url_for, flash, redirect, request
 from app.blueprints.users import users_bp
 from app.models import User
 from app import db, lm, hash
-from flask_login import login_user
+from flask_login import login_user, current_user, login_required
 
 @lm.user_loader # Função para carregar o usuário a partir do ID armazenado na sessão
 def user_loader(id):
@@ -20,11 +20,12 @@ def register():
         return render_template('users/register_user.html', title="Registro de usuário")
     elif request.method == 'POST':
         username = request.form['username']
+        name = request.form['name']
         email = request.form['email']
         profile = request.form['profile']
         password = request.form['password']
         
-        new_user = User(username=username, email=email, profile=profile, password= hash(password))
+        new_user = User(username=username, name=name, email=email, profile=profile, password= hash(password))
         db.session.add(new_user)
         db.session.commit()
         
@@ -49,4 +50,29 @@ def login():
         
         login_user(user) # Loga o usuário se as credenciais estiverem corretas
         
+        # Verifica se o usuário possui uma senha temporaria
+        if user.is_temp_password:
+            return redirect(url_for('users.change_password'))
+        
         return redirect(url_for('main.home'))
+    
+@users_bp.route("/change_password", methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method =='POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if not new_password or new_password != confirm_password:
+            flash('As senhas devem ser iguais.', 'danger')
+            return redirect(url_for('users.change_password'))
+
+        current_user.password = hash(new_password)
+        current_user.is_temp_password = False
+        db.session.commit()
+        flash('Senha alterada com sucesso!', 'success')
+        return redirect(url_for('main.home'))
+    
+    return render_template('users/change_psw.html', title="Alteração de senha")
+    
+        
