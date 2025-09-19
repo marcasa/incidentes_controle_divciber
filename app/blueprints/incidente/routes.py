@@ -250,5 +250,138 @@ def incident_view(incident_id):
 
 
 
+#####################################################################################################
+#=================================DASHBOARD=================================
+#####################################################################################################
+
+# app/blueprints/incidente/routes.py
+# ... (seus imports existentes) ...
+import pandas as pd
+import plotly.express as px
+from sqlalchemy.sql import func
+import json
+
+
+@incidente_bp.route("/dashboard", methods=['GET'])
+@login_required
+def dashboard():
+    # Rota para visualizar o dashboard de incidentes
+    
+    if request.args.get('start_date'):
+        start_date = request.args.get('start_date')
+    else:
+        start_date = '2024-06-03'
+    
+    if request.args.get('end_date'):
+        end_date = request.args.get('end_date')
+    else:
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        
+    incident_type = request.args.get('incident_type')
+    status_str = request.args.get('status')
+    
+    
+    incidents_types = TipoIncidente.query.all()
+    status = StatusIncidente.query.all()
+    
+    incidentes = Incidente.query.all()
+    nomes_colunas = []
+    
+    for incidente in incidentes:
+        nomes_colunas.append({
+            'id': incidente.id,
+            'incident_type': incidente.incident_type,
+            'report_number': incidente.report_number,
+            'ticket_number': incidente.ticket_number,
+            'cpa': incidente.cpa,
+            'btl': incidente.btl,
+            'cia': incidente.cia,
+            'start_date': incidente.start_date,
+            'end_date': incidente.end_date,
+            'status_incident': incidente.status_incident
+        })
+    
+    df= pd.DataFrame(nomes_colunas)
+    
+      
+    filtro_periodo = (df['start_date'] >= pd.to_datetime(start_date)) & (df['start_date'] <= pd.to_datetime(end_date))
+    filtro_status = df['status_incident'] == status_str
+    filtro_tipo_incidente = df['incident_type'] == incident_type
+    
+    filtros_aplicados = f"Periodo: {start_date} - {end_date}, Status: {status_str}, Tipo Incidente: {incident_type}"
+    
+    df_filtred = df[filtro_periodo]
+    
+    print(df_filtred)
+    
+    # if incident_type :
+    #     df_bar = df[df['incident_type'] == incident_type]
+    # else:
+    #     df_bar = df
+    
+    df_bar = df_filtred
+        
+    bar_counts = df_bar.groupby(['cpa', 'btl']).size().reset_index(name='total')
+    
+    ##################################################################
+    # Gráfico de barras empilhadas com Plotly ======================
+    fig_bar = px.bar(
+        bar_counts,
+        x='cpa',
+        y='total',
+        color='btl',
+        title='',
+        labels={'cpa': 'Grande Comando', 'total': 'Incidentes'}
+    )
+    fig_bar.update_layout(barmode='stack')
+    bar_chart_html = fig_bar.to_html(full_html=False)
+    
+    
+    
+    
+    
+    
+    ###########################################
+    #GRAFICO ROSCA
+    
+    # if status_str:
+    #     df_donut = df[df['status_incident'] == status_str]
+    # else:
+    #     df_donut = df
+    
+    df_donut = df_filtred
+        
+    status_counts = df_donut.groupby('status_incident').size().reset_index(name='total')
+    
+    # Cria o gráfico de rosca com Plotly
+    fig_donut = px.pie(
+        status_counts,
+        values='total',
+        names='status_incident',
+        hole=0.6,
+        title='Incidentes por Status'
+    )
+    fig_donut.update_traces(textposition='outside', textinfo='percent+label')
+    donut_chart_html = fig_donut.to_html(full_html=False)
+    
+    
+    
+    
+    
+    return render_template(
+        'dashboard/dashboard.html',
+        title="Dashboard de Incidentes",
+        incidents_types=incidents_types,
+        status=status,
+        bar_chart_html=bar_chart_html,
+        donut_chart_html=donut_chart_html,
+        filtros_aplicados=filtros_aplicados
+        )
+        
+    
+        
+    
+    
+
         
         

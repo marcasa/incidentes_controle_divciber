@@ -20,5 +20,5 @@ with app.app_context():
 print("Script de criação do banco de dados concluído.")
 
 if __name__ == "__main__":
-    app.run(port=5005)
+    app.run(port=5005, host='0.0.0.0' )
     
