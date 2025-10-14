@@ -35,4 +35,9 @@ def get_filtered_incidents_df(start_date, end_date, incident_type, status_str):
         
     df_filtered = df[filtro_periodo & filtro_tipo_incidente & filtro_status]
     
-    return df_filtered
+    filters = ({'start_date': start_date,
+                'end_date': end_date, 
+                'incident_type': incident_type, 
+                'status': status_str})
+    
+    return df_filtered, filters

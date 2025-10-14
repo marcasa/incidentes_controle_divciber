@@ -13,8 +13,16 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('incidente.incidents_list')}}">Incidentes</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('incidente.dashboard')}}">Dashboard</a>
+            
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Dashboard
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('incidente.dashboard_incidentes_cpa_btl')}}">Incidentes por CPA/BTL</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('incidente.dashboard_incidentes_status') }}">Status Incidentes</a></li>
+                    
+                </ul>
             </li>
             
         </ul>

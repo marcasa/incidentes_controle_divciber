@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h3>Dashboard de Incidentes</h3>
+    <h3>Incidentes por CPA e Batalhão</h3>
     
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" action="{{ url_for('incidente.dashboard') }}" class="row g-3 align-items-end">
+            <form method="GET" action="{{ url_for('incidente.dashboard_incidentes_cpa_btl') }}" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="start_date" class="form-label">Data de Início</label>
                     <input type="date" class="form-control" id="start_date" name="start_date" value="{{start_date}}">
@@ -37,13 +37,13 @@
                 </div>
                 <div class="col-12 text-end">
                     <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
-                    <a href="{{ url_for('incidente.dashboard') }}" class="btn btn-secondary">Limpar Filtros</a>
+                    <a href="{{ url_for('incidente.dashboard_incidentes_cpa_btl') }}" class="btn btn-secondary">Limpar Filtros</a>
                 </div>
                 <div class="col-12">
                     <p>
                         <strong>Filtros Aplicados:</strong>
                         {{filtros_aplicados}}
-                        {{filtros_aplicados.incident_type}}
+                        
                     </p> 
                 </div>
             </form>

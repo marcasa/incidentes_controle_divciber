@@ -256,106 +256,35 @@ def incident_view(incident_id):
 #####################################################################################################
 
 # app/blueprints/incidente/routes.py
-# ... (seus imports existentes) ...
+
 import pandas as pd
 import plotly.express as px
 from sqlalchemy.sql import func
-import json
 
-
-@incidente_bp.route("/dashboard", methods=['GET'])
+@incidente_bp.route("/dashboard/incidentes_cpa_btl", methods=['GET'])
 @login_required
-def dashboard():
+def dashboard_incidentes_cpa_btl():
     # # Rota para visualizar o dashboard de incidentes
     
-    # if request.args.get('start_date'):
-    #     start_date = request.args.get('start_date')
-    # else:
-    #     start_date = '2024-06-03'
+   
+    incidents_types = TipoIncidente.query.all() # Carrega os dados da tabela TipoIncidente para o formulário
+    status = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário
     
-    # if request.args.get('end_date'):
-    #     end_date = request.args.get('end_date')
-    # else:
-    #     end_date = datetime.now().strftime('%Y-%m-%d')
-    
-            
-    
-        
-    # incident_type = request.args.get('incident_type')
-    # status_str = request.args.get('status')
-    
-    
-    incidents_types = TipoIncidente.query.all()
-    status = StatusIncidente.query.all()
-    
-    # incidentes = Incidente.query.all()
-    # nomes_colunas = []
-    
-    # for incidente in incidentes:
-    #     nomes_colunas.append({
-    #         'id': incidente.id,
-    #         'incident_type': incidente.incident_type,
-    #         'report_number': incidente.report_number,
-    #         'ticket_number': incidente.ticket_number,
-    #         'cpa': incidente.cpa,
-    #         'btl': incidente.btl,
-    #         'cia': incidente.cia,
-    #         'start_date': incidente.start_date,
-    #         'end_date': incidente.end_date,
-    #         'status_incident': incidente.status_incident
-    #     })
-    
-    # df= pd.DataFrame(nomes_colunas)
-    
-      
-    # filtro_periodo = (df['start_date'] >= pd.to_datetime(start_date)) & (df['start_date'] <= pd.to_datetime(end_date))
-    
-    
-    # filtros_aplicados = ({"start_date" : start_date, 
-    #                      "end_date" : end_date, 
-    #                      "status" : status_str, 
-    #                      "incident_type" : incident_type})
-    
-    
-    
-    # if request.args.get('incident_type') and request.args.get('incident_type') != 'todos' and request.args.get('status') and request.args.get('status') != 'todos':
-    #     filtro_status = df['status_incident'] == status_str
-    #     filtro_tipo_incidente = df['incident_type'] == incident_type
-    # else:
-    #     filtro_status = df['status_incident'] == df['status_incident']
-    #     filtro_tipo_incidente = df['incident_type'] == df['incident_type']
-    
-    # if request.args.get('incident_type') and request.args.get('incident_type') != 'todos':
-    #     filtro_tipo_incidente = df['incident_type'] == incident_type
-    # else:
-    #     filtro_tipo_incidente = df['incident_type'] == df['incident_type']
-    
-    # if request.args.get('status') and request.args.get('status') != 'todos':
-    #     filtro_status = df['status_incident'] == status_str
-    # else:
-    #     filtro_status = df['status_incident'] == df['status_incident']
-        
-      
-    # df_filtred_incidentes_opm = df[filtro_periodo & filtro_tipo_incidente & filtro_status]
-    
+    # Obtém os parâmetros de filtro da URL
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     incident_type = request.args.get('incident_type')
     status_str = request.args.get('status')
 
-    # Chama a função auxiliar para obter os dados filtrados
-    df_filtred_incidentes_opm = get_filtered_incidents_df(start_date, end_date, incident_type, status_str)
-     
-    print(df_filtred_incidentes_opm)
-    
-    filtros_aplicados = {"start_date": start_date, "end_date": end_date, "status": status_str, "incident_type": incident_type}
-        
-    df_bar = df_filtred_incidentes_opm
-        
-    bar_counts = df_bar.groupby(['cpa', 'btl']).size().reset_index(name='total')
+    # Chama função que retorna o dataframe filtrado e os filtros aplicados
+    df_filtred_incidentes_opm, filters = get_filtered_incidents_df(start_date, end_date, incident_type, status_str)
     
     ##################################################################
     # Gráfico de barras empilhadas com Plotly ======================
+    
+    df_bar = df_filtred_incidentes_opm # Passando o DataFrame filtrado para o gráfico de barras
+    bar_counts = df_bar.groupby(['cpa', 'btl']).size().reset_index(name='total')
+    
     fig_bar = px.bar(
         bar_counts,
         x='cpa',
@@ -367,53 +296,72 @@ def dashboard():
     fig_bar.update_layout(barmode='stack')
     bar_chart_html = fig_bar.to_html(full_html=False)
     
-    
-    
-    
-    
-    
-    ###########################################
-    #GRAFICO ROSCA
-    
-    # if status_str:
-    #     df_donut = df[df['status_incident'] == status_str]
-    # else:
-    #     df_donut = df
-    
-    # df_filtred_status = df[filtro_status] 
-    # print(df_filtred_status)
-    
-    # df_donut = df_filtred_status
-        
-    # status_counts = df_donut.groupby('status_incident').size().reset_index(name='total')
-    
-    # # Cria o gráfico de rosca com Plotly
-    # fig_donut = px.pie(
-    #     status_counts,
-    #     values='total',
-    #     names='status_incident',
-    #     hole=0.6,
-    #     title='Incidentes por Status'
-    # )
-    # fig_donut.update_traces(textposition='outside', textinfo='percent+label')
-    # donut_chart_html = fig_donut.to_html(full_html=False)
-    
-    
-    
-    
-    
     return render_template(
-        'dashboard/incidentes_CPA_BTL.html',
+        'dashboard/incidentes_cpa_btl.html',
         title="Dashboard de Incidentes",
-        start_date=start_date,
-        end_date=end_date,
+        start_date= filters['start_date'],
+        end_date= filters['end_date'],
         incidents_types=incidents_types,
         status=status,
         bar_chart_html=bar_chart_html,
-        filtros_aplicados=filtros_aplicados
+        filtros_aplicados=filters
         )
         
+@incidente_bp.route("/dashboard/incidentes_status", methods=['GET'])
+@login_required
+def dashboard_incidentes_status():
+    # Rota para visualizar o dashboard de Status de incidentes
     
+    incidents_types = TipoIncidente.query.all() # Carrega os dados da tabela TipoIncidente para o formulário
+    status = StatusIncidente.query.all() # Carrega os dados da tabela status para o formulário
+    
+     # Obtém os parâmetros de filtro da URL
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    incident_type = request.args.get('incident_type')
+    status_str = request.args.get('status')
+    
+    df_filtred, filtros_aplicados = get_filtered_incidents_df(start_date, end_date, incident_type, status_str)
+    
+    ###########################################
+    #GRAFICO ROSCA
+      
+    df_donut = df_filtred
+        
+    status_counts = df_donut.groupby('status_incident').size().reset_index(name='total')
+    
+    # Cria o gráfico de rosca com Plotly
+    fig_donut = px.pie(
+        status_counts,
+        values='total',
+        names='status_incident',
+        hole=0.6,
+        title='Incidentes por Status'
+    )
+    fig_donut.update_traces(textposition='outside', textinfo='percent+label')
+    donut_chart_html = fig_donut.to_html(full_html=False)
+    
+    print(len(df_filtred))
+    
+    total_incidents = len(df_filtred)
+    total_incidentes_resolvidos = len(df_filtred[df_filtred['status_incident'] == 'Resolvido'])
+    total_incidentes_em_analise = len(df_filtred[df_filtred['status_incident'] == 'Em Análise'])
+    total_incidentes_aguardando = len(df_filtred[df_filtred['status_incident'] == 'Aguardando Informação/Ação Externa'])
+    print(f"Total de Incidentes: {total_incidents}")
+    print(f"Total de Incidentes Resolvidos: {total_incidentes_resolvidos}")
+    print(f"Total de Incidentes Em Análise: {total_incidentes_em_analise}")
+    print(f"Total de Incidentes Aguardando Informação/Ação Externa: {total_incidentes_aguardando}")
+    totais = ({"Total" : total_incidents,
+               "Resolvido": total_incidentes_resolvidos, 
+               "Em Análise": total_incidentes_em_analise, 
+               "Aguardando": total_incidentes_aguardando})
+    return render_template('dashboard/incidentes_status.html', 
+                           title="Dashboard de Incidentes",
+                           donut_chart_html=donut_chart_html,
+                           filtros_aplicados=filtros_aplicados,
+                           incidents_types=incidents_types,
+                           status=status,
+                           totais=totais)
         
     
     
