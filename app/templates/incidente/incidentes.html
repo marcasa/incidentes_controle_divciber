@@ -1,29 +1,75 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-    <h2>{{ title }}</h2>
+    
 
-    <div class="row mb-3 mx-auto">
-        <div class="col-md-6">
-            <a href="{{ url_for('incidente.new_incident') }}" class="btn btn-primary" action="url_for('incidente.new_incident')">Registrar novo incidente</a>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="mb-4">{{ title }}</h2>
+            <div class="row mb-3 mx-auto">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('incidente.new_incident') }}" class="btn btn-primary" action="url_for('incidente.new_incident')">Registrar novo incidente</a>
 
-        </div>
-        <div class="col-md-6 " >
-            
-            <form action="{{ url_for('incidente.search_incident') }}" method="GET" >
-                <div class="input-group">
-                    
-                </div>
-                
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Pesquisar incidentes..." name="termo">
-                    <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
-                </div>
-            </form>
+                    </div>
+                    <div class="col-md-6 " >
+                        
+                        <form action="{{ url_for('incidente.search_incident') }}" method="GET" >
+                            <div class="input-group">
+                                
+                            </div>
+                            
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Pesquisar incidentes..." name="termo">
+                                <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
+                            </div>
+                        </form>
+                    </div>
+            </div>
         </div>
     </div>
+    
+    <div class="card mb-4 ">
+        <div class="card-body ">
+            <h5 class="card-title">Filtros</h5>
+                <div class="row mb-3">
+                    <form class="row g-3 align-items-end " method="GET" action="{{ url_for('incidente.incidents_list') }}">
+                            <div class="col-md-3">
+                                <label for="status_filter" class="form-label">Status</label>
+                                <select class="form-select" id="status_filter" name="status_filter">
+                                    <option value="todos" {% if not status_filter or status_filter == 'todos' %}selected{% endif %}>Todos</option>
+                                    {% for status in status_options %}
+                                        <option value="{{ status[0] }}" {% if status_filter == status[0] %}selected{% endif %}>{{ status[0] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sort_by" class="form-label">Ordenar por</label>
+                                <select class="form-select" id="sort_by" name="sort_by">
+                                    <option value="start_date" {% if sort_by == 'start_date' %}selected{% endif %}>Data de Abertura</option>
+                                    <option value="incident_type" {% if sort_by == 'incident_type' %}selected{% endif %}>Tipo de Incidente</option>
+                                    <option value="report_number" {% if sort_by == 'report_number' %}selected{% endif %}>Nº Relatório</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="direction" class="form-label">Ordem</label>
+                                <select class="form-select" id="direction" name="direction">
+                                    <option value="desc" {% if direction == 'desc' %}selected{% endif %}>Do mais recente ao mais antigo</option>
+                                    <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Do mais antigo ao mais recente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 ">
+                                <button type="submit" class="btn btn-primary flex-fill">Aplicar</button>
+                                <a href="{{ url_for('incidente.incidents_list') }}" class="btn btn-secondary">Limpar Filtros</a>
+                            </div>
 
+                            
+                        </form>
+                </div>
+        </div>
+    </div>
+    
 
+    
 
 
     <table class="table table-bordereds table-hover align-middle text-center">

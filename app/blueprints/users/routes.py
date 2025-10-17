@@ -6,6 +6,7 @@ from app.models import User
 from app import db, lm, hash
 from flask_login import login_user, current_user, login_required
 
+
 @lm.user_loader # Função para carregar o usuário a partir do ID armazenado na sessão
 def user_loader(id):
     user = db.session.query(User).filter_by(id=id).first()
@@ -13,26 +14,38 @@ def user_loader(id):
 
 
 
+#Função para verificar se o perfil do usuário atual permite acesso a determinada rota
+def allowed_edit_profile(profile):
+    if profile.profile == 'Admin' or profile.profile == 'User':
+        return True
+    else:
+        return False
+    
+
 @users_bp.route("/register", methods=['GET', 'POST'])
 def register():
-    # Rota para cadastrar um novo usuário
-    if request.method == 'GET':
-        return render_template('users/register_user.html', title="Registro de usuário")
-    elif request.method == 'POST':
-        username = request.form['username']
-        name = request.form['name']
-        email = request.form['email']
-        profile = request.form['profile']
-        password = request.form['password']
-        
-        new_user = User(username=username, name=name, email=email, profile=profile, password= hash(password))
-        db.session.add(new_user)
-        db.session.commit()
-        
-        login_user(new_user) # Loga o usuário imediatamente após o registro
-        
-        flash('Usuário cadastrado com sucesso!', 'success')
-        return redirect(url_for('users.login'))
+    if current_user.profile == 'Admin':
+        # Rota para cadastrar um novo usuário
+        if request.method == 'GET':
+            return render_template('users/register_user.html', title="Registro de usuário")
+        elif request.method == 'POST':
+            username = request.form['username']
+            name = request.form['name']
+            email = request.form['email']
+            profile = request.form['profile']
+            password = request.form['password']
+            
+            new_user = User(username=username, name=name, email=email, profile=profile, password= hash(password))
+            db.session.add(new_user)
+            db.session.commit()
+            
+            login_user(new_user) # Loga o usuário imediatamente após o registro
+            
+            flash('Usuário cadastrado com sucesso!', 'success')
+            return redirect(url_for('users.login'))
+    else:
+        flash('Acesso negado: Apenas administradores podem cadastrar novos usuários.', 'danger')
+        return redirect(url_for('main.home'))
         
 @users_bp.route("/login", methods=['GET', 'POST'])
 def login():
@@ -54,7 +67,7 @@ def login():
         if user.is_temp_password:
             return redirect(url_for('users.change_password'))
         
-        return redirect(url_for('main.home'))
+        return redirect(url_for('incidente.dashboard_incidentes_status'))
     
 @users_bp.route("/change_password", methods=['GET', 'POST'])
 @login_required
