@@ -1,6 +1,6 @@
 # app/blueprints/analise/routes.py
 
-from flask import render_template, url_for, flash, redirect, request, current_app
+from flask import render_template, url_for, flash, redirect, request
 from app.blueprints.incidente import incidente_bp
 from app.models import Incidente, User, IncidenteObs, Unidades, StatusIncidente, TipoIncidente
 from app import db
@@ -9,7 +9,6 @@ from datetime import datetime
 from sqlalchemy import or_
 from app.utils.data_processing import get_filtered_incidents_df
 from app.blueprints.users.routes import allowed_edit_profile
-
 
 
 
@@ -80,7 +79,7 @@ def new_incident():
             # Usuário logado
             user_id = current_user.id
             
-            #print(f"Status Incidente: {status_incident}\nStart Date: {start_date}\nIncident Type: {incident_type}\nreport_number: {report_number}\nTicket Number: {ticket_number}\nBTL: {btl}\nCPA: {cpa}\nCIA: {cia}\nDescription: {description}\nUser ID: {user_id}")
+            print(f"Status Incidente: {status_incident}\nStart Date: {start_date}\nIncident Type: {incident_type}\nreport_number: {report_number}\nTicket Number: {ticket_number}\nBTL: {btl}\nCPA: {cpa}\nCIA: {cia}\nDescription: {description}\nUser ID: {user_id}")
             # Verifica os campos obrigatórios
             if not all([status_incident, start_date, incident_type, report_number,btl, cpa, description]):
                 flash('Erro: Os campos obrigatórios devem ser preenchidos.', 'danger')
@@ -112,7 +111,6 @@ def new_incident():
             db.session.add(new_incident)
             db.session.commit()
             flash('Incidente registrado com sucesso!', 'success')
-            
             return redirect(url_for('incidente.incidents_list')) #alterar para lista de incidentes
             
         unidades = Unidades.query.all() # Carrega os dados da tabela unidades para o formulário
@@ -128,8 +126,6 @@ def new_incident():
 @incidente_bp.route("/incidente/<int:incident_id>/edit", methods=['GET', 'POST'])
 @login_required
 def edit_incident(incident_id): # Rota para editar um incidente
-    
-    
     #Função para tornar uma string snake_case (e.g., 'status_incident') em uma string amigável (e.g., 'Status Incident').
     def format_key_name(key_name):
         """
@@ -150,13 +146,10 @@ def edit_incident(incident_id): # Rota para editar um incidente
         # Veririfica o metodo da requisição, se for POST, atualiza os dados
         if request.method == 'POST':
             
-            # Formato de data e hora que o input type="datetime-local" e o strftime usam
-            DATE_FORMAT = '%Y-%m-%dT%H:%M'
-
-            # 1. Armazenando os dados originais (em strings para comparação consistente)
+            #Armazenando os dados oriinais antes da edição
             original_data = {
                 'status_incident': incident.status_incident,
-                'start_date': incident.start_date.strftime(DATE_FORMAT) if incident.start_date else '', 
+                'start_date': incident.start_date.strftime('%Y-%m-%dT%H:%M') if incident.start_date else '',
                 'incident_type': incident.incident_type,
                 'report_number': incident.report_number,
                 'ticket_number': incident.ticket_number,
@@ -166,89 +159,50 @@ def edit_incident(incident_id): # Rota para editar um incidente
                 'description': incident.description
             }
             
-            # Mapeamento dos campos do formulário para os atributos do modelo (Incidente)
-            form_to_model = {
-                'status_incidente': 'status_incident',
-                'start_data_hora': 'start_date',
-                'incident_type': 'incident_type',
-                'report_number': 'report_number',
-                'ticket_number': 'ticket_number',
-                'btl': 'btl',
-                'cpa': 'cpa',
-                'cia': 'cia',
-                'description': 'description',
-            }
-
-            changes = []
+                    
+            # Atualiza o objeto incidente com os novos dados do formulário
+            incident.status_incident = request.form['status_incidente'] #notnull
+            incident.start_date = request.form['start_data_hora'] #notnull
+            incident.incident_type = request.form['incident_type'] #notnull
+            incident.report_number = request.form['report_number'] #notnull
+            incident.ticket_number = request.form['ticket_number']
+            incident.btl = request.form['btl'] #notnull
+            incident.cpa = request.form['cpa'] #notnull
+            incident.cia = request.form['cia']
+            incident.description = request.form['description'] #notnull
             
-            # NOVAS VARIÁVEIS para armazenar os novos valores antes da atribuição final
-            new_values_map = {}
-
-            # 2. Iterando sobre o formulário para verificar mudanças E preparar a atribuição
-            for form_key, model_key in form_to_model.items():
-                # Obtém o novo valor do formulário, tratando como string
-                new_value = request.form.get(form_key, '').strip()
-                new_values_map[model_key] = new_value # Armazena o novo valor (string)
-
-                # Obtém o valor original (string normalizada)
-                original_value = original_data.get(model_key, '')
-                
-                # Normaliza valores nulos/vazios para melhor comparação
-                original_str = str(original_value or '')
-                new_str = str(new_value or '')
-                
-                # Exceção para campos que podem ser None/vazio e não devem gerar log se forem de None/Vazio para Vazio
-                if model_key in ['ticket_number', 'cia'] and original_str in ('None', '') and (new_str == '' or new_str == 'None' or new_str is None):
-                    continue
-                
-                # Se houve mudança, registra no log
-                if new_str != original_str:
-                    friendly_name = format_key_name(model_key)
-                    changes.append(f"{friendly_name} alterado de '{original_str}' para '{new_str}'")
-
-
-            # 3. Atribui os novos valores ao objeto incident (GARANTINDO A ATRIBUIÇÃO DE STRINGS)
-            # Isso resolve o problema do 'datetime.datetime' persistente.
-            incident.status_incident = new_values_map['status_incident']
-            incident.start_date = new_values_map['start_date'] # AGORA É A STRING DO FORM
-            incident.incident_type = new_values_map['incident_type']
-            incident.report_number = new_values_map['report_number']
-            incident.ticket_number = new_values_map['ticket_number']
-            incident.btl = new_values_map['btl']
-            incident.cpa = new_values_map['cpa']
-            incident.cia = new_values_map['cia']
-            incident.description = new_values_map['description']
-
-            
-            # 4. Verifica os campos obrigatórios (mantido, mas usando os novos valores)
+            # Verifica os campos obrigatórios
             if not all([incident.status_incident, incident.start_date, incident.incident_type, incident.report_number, incident.btl, incident.cpa, incident.description]):
                 flash('Erro: Os campos obrigatórios devem ser preenchidos.', 'danger')
                 return redirect(url_for('incidente.edit_incident', incident_id=incident_id))
             
-            # 5. Convertendo campos de data para datetime (AGORA É SEGURO)
-            try:
-                # incident.start_date é garantidamente a string do form neste ponto
-                incident.start_date = datetime.strptime(incident.start_date, DATE_FORMAT)
-            except ValueError:
-                flash('Erro: Formato de data/hora inválido.', 'danger')
-                return redirect(url_for('incidente.edit_incident', incident_id=incident_id))
-
+            # Convertendo campos de data para datetime
+            incident.start_date = datetime.strptime(incident.start_date, '%Y-%m-%dT%H:%M')
             # if incident.end_date:
-            #     incident.end_date = datetime.strptime(incident.end_date, DATE_FORMAT)
+            #     incident.end_date = datetime.strptime(incident.end_date, '%Y-%m-%dT%H:%M')
             # else:
             #     incident.end_date = None
             
-            # 5. Gravando a observação de alterações
+            #VERIFICANDO QUAIS CAMPOS FORAM MODIFICADOS
+            changes = []
+            campos = ['status_incident', 'start_date', 'incident_type', 'report_number', 'ticket_number', 'btl', 'cpa', 'cia', 'description']
+            
+            for key, new_value in incident.__dict__.items():
+                original_value = original_data.get(key)
+                if new_value != str(original_value):
+                    if key in campos:
+                        friendly_name= format_key_name(key)
+                        changes.append(f"{friendly_name} alterado de '{original_value}' para '{new_value}' \n")  
+            
             if changes:
                 txt_obs = "Alterações realizadas:\n" + "\n".join(changes)
-                txt_obs += f"Usuário: {current_user.name}"
-                # Note: 'usuario_id=1' é o 'Sistema' conforme seu código original
-                new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=1, texto_observacao=txt_obs, data_observacao=datetime.now()) 
-                db.session.add(new_obs)
+                new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=1, texto_observacao=txt_obs, data_observacao=datetime.now()) #Usuário ID 1 -Sistema        
             
-            # 6. Adicionando e comitando no banco de dados (o objeto incident já foi modificado)
+            # Adicionando a observação de alterações no incidente
+            db.session.add(new_obs)
+            
+            # Adicionando e comitando no banco de dados
             db.session.commit()
-            current_app.logger.info(f"Usuario {current_user.id} editou o incidente {incident_id}") # REGISTRANDO LOG
             flash('Incidente editado com sucesso!', 'success')
             return redirect(url_for('incidente.incident_view', incident_id=incident_id))
         
@@ -259,7 +213,6 @@ def edit_incident(incident_id): # Rota para editar um incidente
         # Se for GET, renderiza o formulário com os dados atuais
         return render_template('incidente/new_incident.html', title="Editar Incidente", incident = incident, edit_mode=edit_mode, unidades=unidades, status_incident_list=status_incident_list, incidents_types=incidents_types)
     else:
-        current_app.logger.info(f"Usuario {current_user.id} tentou editar o incidente {incident_id}. Sem permissão. {current_user.profile}")
         flash('Acesso negado: Você não tem permissão para editar este incidente.', 'danger')
         return redirect(url_for('incidente.incident_view', incident_id=incident_id))
 #================================EXCLUIR INCIDENTE=================================

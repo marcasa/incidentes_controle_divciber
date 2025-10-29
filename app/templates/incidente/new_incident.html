@@ -15,17 +15,13 @@
                         <label for="status_incidente" class="form-label"><strong>Status</strong></label>        
                         <select class="form-select" name="status_incidente" aria-label="Default select example" >
                             <option selected>{{ incident.status_incident if incident else 'Selecione o Status' }}</option>
-                            {% if incident %}
+                            
                                 {% for status in status_incident_list %}
                                 <option value="{{status.status}}">
                                 {{status.status}}
                                 </option>
                                 {% endfor %}
-                            {% else %}
-                                <option value="Aberto/Novo">
-                                Aberto/Novo
-                                </option>
-                            {% endif %}
+                            
                                                
                     </select>
 

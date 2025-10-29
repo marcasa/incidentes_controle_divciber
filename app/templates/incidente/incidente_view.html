@@ -52,11 +52,7 @@
                 <div class="card m-2">
                     <div class="card-header">
                         <div class="card-body">
-                            {% if edit_mode %}
-                                <h5 class="card-title">Alteração</h5>
-                            {% else %}
-                                <h5 class="card-title">Observação</h5>
-                            {% endif %}
+                            <h5 class="card-title">{{ 'Alteração' if obs.autor_obs.name == 'system' else 'Observação'}}</h5>
                             <p class="card-text">{{obs.texto_observacao}}</p>
                             <small class="text-muted">
                                 Por {{ obs.autor_obs.name }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }} - ID:{{ obs.id }}

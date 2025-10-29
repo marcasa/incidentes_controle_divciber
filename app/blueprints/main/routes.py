@@ -1,6 +1,6 @@
 # app/blueprints/main/routes.py
 
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, current_app
 from app.blueprints.main import main_bp #importando a instância do blueprint main
 from flask_login import login_required, logout_user, current_user
 
@@ -20,6 +20,7 @@ def about():
 @login_required
 def logout():
     # Rota para logout do usuário
+    current_app.logger.info(f" {current_user.username} deslogou.")
     logout_user()
     return redirect(url_for('main.home'))
     

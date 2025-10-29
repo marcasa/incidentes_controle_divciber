@@ -1,6 +1,6 @@
 # app/blueprints/users/routes.py
 
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, current_app
 from app.blueprints.users import users_bp
 from app.models import User
 from app import db, lm, hash
@@ -38,12 +38,13 @@ def register():
             new_user = User(username=username, name=name, email=email, profile=profile, password= hash(password))
             db.session.add(new_user)
             db.session.commit()
+                 
             
-            login_user(new_user) # Loga o usuário imediatamente após o registro
-            
+            current_app.logger.info(f" {current_user.username} cadastrou o usuário: {username}")
             flash('Usuário cadastrado com sucesso!', 'success')
             return redirect(url_for('users.login'))
     else:
+        current_app.logger.info(f" {current_user.username} tentou cadastrar um usuário sem permissão.")
         flash('Acesso negado: Apenas administradores podem cadastrar novos usuários.', 'danger')
         return redirect(url_for('main.home'))
         
@@ -58,6 +59,7 @@ def login():
         
         user = db.session.query(User).filter_by(username=username, password= hash(password)).first()
         if not user:
+            current_app.logger.info(f" {username} tentou logar com usuario ousenha incorreta.") #REGISTRANDO LOG
             flash('Nome de usuário ou senha incorretos.', 'danger')
             return redirect(url_for('users.login'))
         
@@ -65,6 +67,7 @@ def login():
         
         # Verifica se o usuário possui uma senha temporaria
         if user.is_temp_password:
+            current_app.logger.info(f" {user.username} logou com uma senha temporária.") #REGISTRANDO LOG
             return redirect(url_for('users.change_password'))
         
         return redirect(url_for('incidente.dashboard_incidentes_status'))
@@ -83,6 +86,7 @@ def change_password():
         current_user.password = hash(new_password)
         current_user.is_temp_password = False
         db.session.commit()
+        current_app.logger.info(f" {current_user.username} alterou sua senha.")
         flash('Senha alterada com sucesso!', 'success')
         return redirect(url_for('main.home'))
     

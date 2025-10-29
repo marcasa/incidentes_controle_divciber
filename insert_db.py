@@ -167,6 +167,6 @@ def import_from_csv(file_path, tb_name):
         
 
 if __name__ == '__main__':
-    csv_file_path = 'tb_unidades.csv'
-    import_from_csv(csv_file_path, "tb_unidades")        
+    csv_file_path = 'tb_incidentes.xlsx'
+    import_from_csv(csv_file_path, "tb_incidentes")        
             
