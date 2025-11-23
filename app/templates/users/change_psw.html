@@ -8,22 +8,94 @@
                 <h3>Alteração de senha</h3>
             </div>
             <div class="card-body">
-                <form method="POST" action="#">
+                <form id="passwordForm" method="POST" action="#"> 
                     <div class="mb-3">
-                        <label for="password" class="form-label">Nova Senha</label>
+                        <label for="new_password" class="form-label">Nova Senha</label>
                         <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        <div id="newPasswordError" class="text-danger small mt-1"></div> 
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Confirmar Senha</label>
+                        <label for="confirm_password" class="form-label">Confirmar Senha</label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        <div id="confirmPasswordError" class="text-danger small mt-1"></div> 
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success">Alterar Senha</button>
                     </div>
                 </form>
             </div>
-            
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('passwordForm').addEventListener('submit', function(event) {
+        // Pega os valores dos campos
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        // Elementos de feedback
+        const newPassErrorElement = document.getElementById('newPasswordError');
+        const confirmPassErrorElement = document.getElementById('confirmPasswordError');
+
+        // Limpa erros anteriores
+        newPassErrorElement.textContent = '';
+        confirmPassErrorElement.textContent = '';
+        let isValid = true;
+
+        // --- 1. VALIDAÇÃO DE FORÇA DE SENHA ---
+        const strengthResult = validatePasswordStrength(newPassword);
+
+        if (strengthResult !== true) {
+            newPassErrorElement.textContent = strengthResult;
+            isValid = false;
+        }
+
+        // --- 2. VALIDAÇÃO DE IGUALDADE ---
+        if (newPassword !== confirmPassword) {
+            confirmPassErrorElement.textContent = "As senhas não são idênticas.";
+            isValid = false;
+        }
+
+        // Se a validação falhar, impede o envio do formulário
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+
+    /**
+     * Verifica a força da senha usando Expressões Regulares (Regex).
+     * @param {string} password - A senha a ser validada.
+     * @returns {string|boolean} Retorna a mensagem de erro ou true se for forte.
+     */
+    function validatePasswordStrength(password) {
+        if (password.length < 8) {
+            return "A senha deve ter no mínimo 8 caracteres.";
+        }
+
+        let erros = [];
+
+        // Critérios de Regex
+        if (!/[A-Z]/.test(password)) {
+            erros.push("uma letra maiúscula");
+        }
+        if (!/[a-z]/.test(password)) {
+            erros.push("uma letra minúscula");
+        }
+        if (!/[0-9]/.test(password)) {
+            erros.push("um número");
+        }
+        // Regex para caracteres especiais comuns
+        if (!/[!@#$%^&*()_+={}[\]:;"'<,>.?/~`-]/.test(password)) {
+            erros.push("um caractere especial");
+        }
+
+        if (erros.length > 0) {
+            return `A senha deve conter: ${erros.join(", ")}.`;
+        }
+
+        return true;
+    }
+</script>
+
 {% endblock %}

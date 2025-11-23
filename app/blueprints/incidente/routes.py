@@ -115,7 +115,7 @@ def incidents_list():
 
 @login_required
 def new_incident():
-    if allowed_edit_profile(current_user):
+    if allowed_edit_profile(current_user): # função para verificar permissão do usuário para edição
         # Rota para registro de novo incidente
         if request.method == 'POST':
             # recebendo dados do formulário
@@ -375,18 +375,21 @@ def search_incident():
 @incidente_bp.route("/incidente/<int:incident_id>/add_obs", methods=['POST'])
 @login_required
 def add_obs(incident_id):
-    # Rota para adicionar observação ao incidente
-    texto_observacao = request.form['texto_observacao']
-    user_id = current_user.id # Usuário logado
-    data_observacao = datetime.now() # Data e hora atual
-    
-    # Adicionando e comitando no banco de dados
-    new_obs = IncidenteObs(incidente_id=incident_id, usuario_id=user_id, texto_observacao=texto_observacao, data_observacao=data_observacao)
-    db.session.add(new_obs)
-    db.session.commit()
-    flash('Observação adicionada com sucesso!', 'success')
-    return redirect(url_for('incidente.incident_view', incident_id=incident_id))
-
+    if allowed_edit_profile(current_user):
+        # Rota para adicionar observação ao incidente
+        texto_observacao = request.form['texto_observacao']
+        user_id = current_user.id # Usuário logado
+        data_observacao = datetime.now() # Data e hora atual
+        
+        # Adicionando e comitando no banco de dados
+        new_obs = IncidenteObs(incidente_id=incident_id, usuario_id=user_id, texto_observacao=texto_observacao, data_observacao=data_observacao)
+        db.session.add(new_obs)
+        db.session.commit()
+        flash('Observação adicionada com sucesso!', 'success')
+        return redirect(url_for('incidente.incident_view', incident_id=incident_id))
+    else:
+        flash('Acesso negado: Você não tem permissão para inserir uma observação.', 'danger')
+        return redirect(url_for('incidente.incident_view', incident_id=incident_id))
 
 #=================================EXCLUIR OBSERVAÇÃO=================================
 @incidente_bp.route("/incidente/<int:incident_id>/delete_obs/<int:obs_id>", methods=['POST'])
@@ -507,14 +510,17 @@ def dashboard_incidentes_status():
     total_incidentes_encerrados = len(df_filtred[df_filtred['status_incident'] == 'Encerrado'])
     total_incidentes_em_analise = len(df_filtred[df_filtred['status_incident'] == 'Em Análise'])
     total_incidentes_em_mitigacao = len(df_filtred[df_filtred['status_incident'] == 'Em Mitigação'])
+    total_incidentes_falso_positivo = len(df_filtred[df_filtred['status_incident'] == 'Falso positivo'])
     print(f"Total de Incidentes: {total_incidents}")
     print(f"Total de Incidentes Encerrados: {total_incidentes_encerrados}")
     print(f"Total de Incidentes Em Análise: {total_incidentes_em_analise}")
     print(f"Total de Incidentes Aguardando Informação/Ação Externa: {total_incidentes_em_mitigacao}")
+    print(f"Total de Incidentes Falso positivo: {total_incidentes_falso_positivo}")
     totais = ({"Total" : total_incidents,
                "Resolvido": total_incidentes_encerrados, 
                "Em Análise": total_incidentes_em_analise, 
-               "Aguardando": total_incidentes_em_mitigacao})
+               "Aguardando": total_incidentes_em_mitigacao, 
+               "Falso Positivo": total_incidentes_falso_positivo})
     
     return render_template('dashboard/incidentes_status.html', 
                            title="Dashboard de Incidentes",
