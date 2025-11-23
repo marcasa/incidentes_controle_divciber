@@ -5,11 +5,34 @@ from app.blueprints.incidente import incidente_bp
 from app.models import Incidente, User, IncidenteObs, Unidades, StatusIncidente, TipoIncidente
 from app import db
 from flask_login import login_required, current_user
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import or_
 from app.utils.data_processing import get_filtered_incidents_df
 from app.blueprints.users.routes import allowed_edit_profile
 
+
+
+
+# Função auxiliar para formatar timedelta em uma string legível ##  PASSAR ESSA FUNÇÃO PARA UM ARQUIVO UTILIDADES
+def format_timedelta(td):
+    """Formata um objeto timedelta para uma string legível (Dias, Horas, Minutos)."""
+    if not td:
+        return "N/A"
+        
+    total_segundos = int(td.total_seconds())
+    dias, resto = divmod(total_segundos, 86400)
+    horas, resto = divmod(resto, 3600)
+    minutos, _ = divmod(resto, 60)
+    
+    tempo_formatado = []
+    if dias > 0:
+        tempo_formatado.append(f"{dias}d")
+    if horas > 0:
+        tempo_formatado.append(f"{horas}h")
+    if minutos > 0:
+        tempo_formatado.append(f"{minutos}m")
+        
+    return " ".join(tempo_formatado) if tempo_formatado else "1m"
 
 
 
@@ -46,12 +69,41 @@ def incidents_list():
     # Rota para listar todas as análises
     incidentes = query.all()
     
+    
+    
+    # Define o momento atual para calcular o tempo aberto
+    now = datetime.now(timezone.utc)
+
+    # Itera sobre os incidentes para calcular e anexar o tempo aberto
+    incidentes_com_tempo = []
+    for inc in incidentes:
+        # 1. Torna a data de abertura CONSCIENTE (aware) de UTC
+        #    Isso resolve o "offset-naive" do start_date
+        start_date_aware = inc.start_date.replace(tzinfo=timezone.utc)
+        
+        # Se o incidente foi fechado, calcula a duração total (fechamento - abertura)
+        if inc.end_date:
+            # 2. Torna a data de fechamento CONSCIENTE (aware) de UTC
+            end_date_aware = inc.end_date.replace(tzinfo=timezone.utc)
+            
+            # Agora a subtração é válida: aware - aware
+            duracao = end_date_aware - start_date_aware
+        
+        # Se o incidente está aberto, calcula a duração até o momento atual (now - abertura)
+        else:
+            # Subtração válida: aware - aware
+            duracao = now - start_date_aware
+            
+        # Anexa a string formatada ao objeto incidente
+        inc.tempo_aberto_formatado = format_timedelta(duracao)
+        incidentes_com_tempo.append(inc)
+    
     # Para o filtro de status no HTML
     status_options = db.session.query(Incidente.status_incident).distinct().all()
     
     return render_template('incidente/incidentes.html', 
                            title="Incidentes Registrados", 
-                           incidentes = incidentes,
+                           incidentes = incidentes_com_tempo,
                            status_options=status_options,
                            direction_filter=direction_filter,
                            sort_by=sort_by,
@@ -204,6 +256,8 @@ def edit_incident(incident_id): # Rota para editar um incidente
                 # Se houve mudança, registra no log
                 if new_str != original_str:
                     friendly_name = format_key_name(model_key)
+                    if new_str == 'Encerrado': #SE O STATUS FOR ALTERADO PARA ENCERRADO, ATRIBUI A DATA ATUAL PARA END_DATE
+                        incident.end_date = datetime.now().strptime(DATE_FORMAT)
                     changes.append(f"{friendly_name} alterado de '{original_str}' para '{new_str}'")
 
 
@@ -211,6 +265,7 @@ def edit_incident(incident_id): # Rota para editar um incidente
             # Isso resolve o problema do 'datetime.datetime' persistente.
             incident.status_incident = new_values_map['status_incident']
             incident.start_date = new_values_map['start_date'] # AGORA É A STRING DO FORM
+            
             incident.incident_type = new_values_map['incident_type']
             incident.report_number = new_values_map['report_number']
             incident.ticket_number = new_values_map['ticket_number']
@@ -229,6 +284,7 @@ def edit_incident(incident_id): # Rota para editar um incidente
             try:
                 # incident.start_date é garantidamente a string do form neste ponto
                 incident.start_date = datetime.strptime(incident.start_date, DATE_FORMAT)
+                
             except ValueError:
                 flash('Erro: Formato de data/hora inválido.', 'danger')
                 return redirect(url_for('incidente.edit_incident', incident_id=incident_id))
@@ -240,7 +296,7 @@ def edit_incident(incident_id): # Rota para editar um incidente
             
             # 5. Gravando a observação de alterações
             if changes:
-                txt_obs = "Alterações realizadas:\n" + "\n".join(changes)
+                txt_obs = "Alterações:\n" + "\n".join(changes)
                 txt_obs += f"Usuário: {current_user.name}"
                 # Note: 'usuario_id=1' é o 'Sistema' conforme seu código original
                 new_obs = IncidenteObs(incidente_id=incident.id, usuario_id=1, texto_observacao=txt_obs, data_observacao=datetime.now()) 

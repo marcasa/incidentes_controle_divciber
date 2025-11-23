@@ -70,6 +70,7 @@ def login():
             current_app.logger.info(f" {user.username} logou com uma senha temporária.") #REGISTRANDO LOG
             return redirect(url_for('users.change_password'))
         
+        current_app.logger.info(f" {user.username} logou no sistema.") #REGISTRANDO LOG
         return redirect(url_for('incidente.dashboard_incidentes_status'))
     
 @users_bp.route("/change_password", methods=['GET', 'POST'])

@@ -82,6 +82,7 @@
             <th>CPA</th>
             <th>BTL</th>
             <th>Companhia</th>
+            <th>Tempo desde abertura</th>
             <th>Status</th>
             <th>Visualizar</th>
             <!-- <th>Deletar</th> -->
@@ -106,6 +107,7 @@
                 <td>{{incidente.btl}}</td>
                 <td>{{incidente.cia}}</td>
                 <td>{{incidente.status_incident}}</td>
+                <td>{{ incidente.tempo_aberto_formatado}}</td>
                 <td><a href="{{url_for('incidente.incident_view', incident_id=incidente.id)}}" class="btn btn-warning btn-sm">Visualizar</a></td>
                 <!-- <td><a href="" class="btn btn-danger btn-sm">Deletar</a></td> -->
             {% endfor %}
