@@ -257,7 +257,7 @@ def edit_incident(incident_id): # Rota para editar um incidente
                 if new_str != original_str:
                     friendly_name = format_key_name(model_key)
                     if new_str == 'Encerrado': #SE O STATUS FOR ALTERADO PARA ENCERRADO, ATRIBUI A DATA ATUAL PARA END_DATE
-                        incident.end_date = datetime.now().strptime(DATE_FORMAT)
+                        incident.end_date = datetime.now()
                     changes.append(f"{friendly_name} alterado de '{original_str}' para '{new_str}'")
 
 

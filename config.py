@@ -12,7 +12,7 @@ class Config:
     
 
 class DevelopmentConfig(Config):
-    DEBUG = True # Ativa o modo debug (recarregamento automático, mensagens de erro detalhadas)
+    DEBUG = False # Ativa o modo debug (recarregamento automático, mensagens de erro detalhadas)
     
 class ProductionConfig(Config):
     DEBUG = False # Desativa o modo debug
