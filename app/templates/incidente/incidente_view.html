@@ -101,25 +101,5 @@
             </div>
         </div>
         <!-- Card Observações -FIM -->
-
-    <!-- <div class="row">
-        <div class="col-md-12">
-            <h4>Observações</h4>
-            {% if incidente.obs_incidente %}
-                <ul class="list-group">
-                    {% for obs in incidente.obs_incidente %}
-                        <li class="list-group-item">
-                            <p class="mb-1">{{ obs.texto_observacao }}</p>
-                            <small class="text-muted">Por {{ obs.autor_obs.username }} em {{ obs.data_observacao.strftime('%d/%m/%Y %H:%M') }}</small>
-                        </hr>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">Nenhuma observação encontrada.</p>
-            {% endif %}
-        </div>
-
-    </div> -->
 </div>        
 {% endblock %}

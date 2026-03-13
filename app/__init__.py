@@ -2,7 +2,7 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import DevelopmentConfig, ProductionConfig # Importando as classes de configuração do arquivo config.py
+from config import Config # Importando as classes de configuração do arquivo config.py
 from flask_login import LoginManager, set_login_view # Importando o gerenciador de login
 import hashlib
 import logging
@@ -19,7 +19,7 @@ db = SQLAlchemy()
 lm = LoginManager()
 
 logging.basicConfig(level=logging.INFO, filename='app.log', format='%(asctime)s - %(levelname)s - %(message)s')
-def create_app(config_class=ProductionConfig):
+def create_app(config_class=Config):
     
     app = Flask(__name__) # Criando uma instância do Flask
     app.config.from_object(config_class) # Carregando a configuração da classe fornecida > Desenvolvimento ou Produção

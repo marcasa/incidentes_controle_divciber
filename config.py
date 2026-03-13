@@ -1,3 +1,4 @@
+# config.py
 import os
 
 
@@ -11,11 +12,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
 
-class DevelopmentConfig(Config):
-    DEBUG = False # Ativa o modo debug (recarregamento automático, mensagens de erro detalhadas)
-    
-class ProductionConfig(Config):
-    DEBUG = False # Desativa o modo debug
+
+  
 
 
 

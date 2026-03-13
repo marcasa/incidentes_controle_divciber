@@ -5,9 +5,7 @@
 <div class="container">
 
     <h2>{{ title }}</h2>
-
     <form method="post">
-        
         <div class="container ">
             <div class="row">
                 <div class="col">
@@ -17,13 +15,13 @@
                             <option selected>{{ incident.status_incident if incident else 'Selecione o Status' }}</option>
                             
                                 {% for status in status_incident_list %}
-                                <option value="{{status.status}}">
-                                {{status.status}}
-                                </option>
+                                    {% if edit_mode or status.id != 4 %}
+                                        <option value="{{status.status}}">
+                                        {{status.status}}
+                                        </option>
+                                    {% endif %}
                                 {% endfor %}
-                            
-                                               
-                    </select>
+                        </select>
 
                     </div>
                 </div>
@@ -48,13 +46,10 @@
                         {{tp_incidente.tipo_incidente}}
                         </option>
                         {% endfor %}
-                                          
                     </select>
                 </div>
-                
             </div>
         </div>
-
         <div class="container">
             <div class="row">
                 <div class="col">
@@ -73,11 +68,7 @@
                 </div>
 
             </div>
-
         </div>
-
-        
-        
         <div class="container">
             <div class="row">
                 <div class="col">
@@ -92,8 +83,6 @@
                         {{unidade.btl}}
                         </option>
                         {% endfor %}
-                        
-                                          
                     </select>
                 </div>
                 <div class="col">
@@ -109,9 +98,7 @@
                         <input type="text" class="form-control" name="cia" placeholder="Cia" value="{{ incident.cia if incident else '' }}" >
                     </div>
                 </div>
-
             </div>
-
         </div>
 
         <div class="container">
@@ -128,58 +115,7 @@
             </div>
         </div>
     
-        <!-- Card Observações -->
-        <!-- <div class="container mt-2">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Observações</h4>
-                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addObsModal">
-                        Adicionar Observação
-                    </button>
-                </div>
-                <div class="card-body">
-                
-                        <ul class="list-group">
-                            
-                                <li class="list-group-item">
-                                    <p class="mb-1">texto_observacao </p>
-                                    <small class="text-muted">
-                                        Por autor_obs.username  em data_observacao
-                                    </small>
-                                </li>
-                            
-                        </ul>
-                    
-                        <p class="text-muted">Nenhuma observação foi adicionada ainda.</p>
-                    
-                </div>
-            </div>
-        
-
-            <div class="modal fade" id="addObsModal" tabindex="-1" aria-labelledby="addObsModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addObsModalLabel">Adicionar Nova Observação</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form method="POST" action="">
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="texto_observacao" class="form-label">Observação</label>
-                                    <textarea class="form-control" id="texto_observacao" name="texto_observacao" rows="5" required></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar Observação</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-        <!-- Card Observações -FIM -->
+       
 
     <div class="container mt-2">
         
