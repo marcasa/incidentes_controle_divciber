@@ -10,7 +10,7 @@
 __pycache__/
 .venv/
 
-app/static/uploads/
+app/static/uploads
 
 .flaskenv
 .vscode/
