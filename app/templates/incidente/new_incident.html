@@ -1,11 +1,17 @@
-
 {% extends "base.html" %}
 
 {% block content %}
 <div class="container">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quil/quil.css') }}">
+    <style>
+        #quill-editor { height: 300px; }
+    </style>
+
     <h2>{{ title }}</h2>
-    <form method="post">
+
+
+    <form method="post" id="incidentForm">
         <div class="container ">
             <div class="row">
                 <div class="col">
@@ -61,7 +67,7 @@
                 </div>
                 <div class="col">
                     <div class="mb-3">
-                        <label for="ticket_number" class="form-label">Nº Mensagem/Chamado</label>
+                        <label for="ticket_number" class="form-label">Num Mensagem</label>
                         <input type="text" class="form-control" name="ticket_number" placeholder="Número da mensagem ou chamado" value="{{ incident.ticket_number if incident else '' }}"  >
                     </div>
 
@@ -105,37 +111,146 @@
             <div class="row">
                 <div class="col">
                     <h3>Descrição do Incidente</h3>
-                    <div class="form-floating">
-                        
-                        <textarea class="form-control" placeholder="Descrição do Incidente -  Como? Quando? Quando? O que? Por que? medidas tomadas" style="height: 300px;" name="description" id="description" >{{ incident.description if incident else '' }}</textarea>
-                        <label for="description">Descrição do Incidente</label>
-                    </div>
-
+                    <div id="quill-editor"></div>
+                    <input type="hidden" name="description" id="description_input">
                 </div>
             </div>
         </div>
     
-       
 
     <div class="container mt-2">
-        
         {% if edit_mode %}
         <button type="submit" class="btn btn-primary mb-3"  id="btnSalvar" onclick="return confirm('Tem certeza de que deseja salvar as alterações?')">Salvar Alterações</button>
         {% else %}
         <button type="submit" class="btn btn-primary mb-3"  id="btnSalvar" >Registrar Incidente</button>
         {% endif %}
     </div>
-
-    
-
         
     </form>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/quill/quil.js') }}"></script>
+<script>
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+                ['link', 'image', 'video'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Carrega conteúdo inicial se estiver em modo de edição
+    {% if incident and incident.description %}
+        quill.clipboard.dangerouslyPasteHTML(0, `{{ incident.description|safe }}`);
+    {% endif %}
+
+    // Image upload handler
+    quill.getModule('toolbar').addHandler('image', function() {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+        input.onchange = function() {
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('upload', file);
+            
+            fetch("{{ url_for('incidente.upload_image') }}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.url) {
+                    var range = quill.getSelection();
+                    quill.insertEmbed(range.index, 'image', result.url);
+                    quill.setSelection(range.index + 1);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    });
+
+    // Handler para colagem de imagens (Ctrl+V)
+    quill.root.addEventListener('paste', function(e) {
+        var clipboardData = e.clipboardData || window.clipboardData;
+        if (!clipboardData || !clipboardData.items) return;
+
+        var hasImage = false;
+        for (var i = 0; i < clipboardData.items.length; i++) {
+            if (clipboardData.items[i].type.indexOf('image') !== -1) {
+                hasImage = true;
+                break;
+            }
+        }
+
+        if (hasImage) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            for (var i = 0; i < clipboardData.items.length; i++) {
+                if (clipboardData.items[i].type.indexOf('image') !== -1) {
+                    var file = clipboardData.items[i].getAsFile();
+                    var formData = new FormData();
+                    formData.append('upload', file);
+                    
+                    fetch("{{ url_for('incidente.upload_image') }}", {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.url) {
+                            var range = quill.getSelection();
+                            quill.insertEmbed(range.index, 'image', result.url);
+                            quill.setSelection(range.index + 1);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+        }
+    });
+
+    // Bloqueia qualquer tentativa de inserção de imagens base64 via clipboard
+    quill.clipboard.addMatcher(Node.ELEMENT_NODE, function(node, delta) {
+        if (node.tagName === 'IMG' && node.src && node.src.startsWith('data:image')) {
+            var Delta = Quill.import('delta');
+            return new Delta(); // Remove o delta da imagem base64
+        }
+        return delta;
+    });
+
+    document.getElementById('incidentForm').onsubmit = function() {
+        // Usamos o innerHTML diretamente, mas vamos limpar possíveis restos do quill
+        var htmlContent = quill.root.innerHTML;
+        
+        // Força a remoção de qualquer tag img com src data:image, caso tenha escapado
+        var div = document.createElement('div');
+        div.innerHTML = htmlContent;
+        var imgs = div.querySelectorAll('img');
+        imgs.forEach(function(img) {
+            if (img.src && img.src.startsWith('data:image')) {
+                img.remove(); // Remove imagens base64 restantes
+            }
+        });
+        
+        document.getElementById('description_input').value = div.innerHTML;
+    };
+</script>
 
 {% endblock %}
-
-
-
-

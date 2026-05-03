@@ -30,7 +30,7 @@
                     <p class="card-text"><strong>CPA:</strong> {{ incidente.cpa }}</p>
                     <p class="card-text"><strong>Batalhão:</strong> {{ incidente.btl }}</p>
                     <p class="card-text"><strong>Companhia:</strong> {{ incidente.cia or 'N/A' }}</p>
-                    <p class="card-text"><strong>Descrição:</strong> {{ incidente.description }}</p>
+                    <p class="card-text"><strong>Descrição:</strong> {{ incidente.description|safe }}</p>
                     
                 </div>
             </div>

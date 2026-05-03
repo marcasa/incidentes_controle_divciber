@@ -1,6 +1,12 @@
 # Usa uma imagem leve do Python baseada em Debian
 FROM python:3.12-slim
 
+# --- AJUSTE DE HORÁRIO ---
+# Define o fuso horário como variável de ambiente e configura o sistema
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# -------------------------
+
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 
